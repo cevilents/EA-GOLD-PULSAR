@@ -11,20 +11,43 @@ npm run dev
 
 Buka http://localhost:3000
 
-## Setup Form Klaim (GitHub Issues)
+## Setup Form Klaim (Supabase + File Lisensi GitHub)
 
-Form klaim menyimpan pengajuan sebagai Issue di repo GitHub privat lewat `/api/submit`.
+Form klaim menyimpan pengajuan ke tabel `claims` di Supabase lewat `/api/submit`. Setiap klaim yang disetujui — otomatis saat verifikasi atau manual lewat `/admin` — nomor akun tradingnya langsung ditambahkan ke file lisensi di repo GitHub.
 
-1. Buat repo privat kosong (mis. `username/goldpulsarea-claims`).
-2. Buat Personal Access Token (classic) dengan scope `repo`: GitHub → Settings → Developer settings → Tokens.
-3. Salin `.env.example` menjadi `.env.local`, isi:
+### 1. Supabase
+
+1. Buat project di [supabase.com](https://supabase.com), buka **SQL Editor**, jalankan:
+   ```sql
+   create table if not exists claims (
+     id bigint generated always as identity primary key,
+     name text not null,
+     email text not null,
+     telegram text default '',
+     account text not null unique,
+     status text not null default 'pending',
+     reason text,
+     checks jsonb not null default '[]',
+     created_at timestamptz not null default now(),
+     updated_at timestamptz not null default now()
+   );
    ```
-   GITHUB_TOKEN=ghp_tokenmu
-   GITHUB_REPO=username/goldpulsarea-claims
-   ```
-4. Di Vercel: Project Settings → Environment Variables → tambahkan kedua nilai yang sama.
+2. Ambil **Project URL** dan kunci **service_role** di Settings → API.
+3. Salin `.env.example` menjadi `.env.local`, isi `SUPABASE_URL` dan `SUPABASE_SERVICE_ROLE_KEY`; tambahkan nilai yang sama di Vercel (Project Settings → Environment Variables).
 
-Tanpa kedua variabel itu, form mengembalikan pesan "layanan belum dikonfigurasi".
+### 2. File lisensi GitHub
+
+Repo publik `aliqasalsabilla5-lang/MEMBERVIP` berisi file `PHOENIXALPHA` yang hanya memuat nomor akun trading teraktivasi, satu per baris. Isi env berikut (lokal maupun Vercel):
+
+```
+GITHUB_TOKEN=ghp_tokenmu
+GITHUB_REPO=aliqasalsabilla5-lang/MEMBERVIP
+LICENSE_FILE_PATH=PHOENIXALPHA
+```
+
+`GITHUB_TOKEN` adalah Personal Access Token (classic) dengan scope `repo` pada repo MEMBERVIP; `LICENSE_FILE_PATH` boleh dikosongkan (default `PHOENIXALPHA`).
+
+Caution: karena repo MEMBERVIP publik, siapa pun dapat membaca daftar akun teraktivasi di file `PHOENIXALPHA` — pastikan kamu nyaman dengan itu.
 
 ## Admin Panel
 
@@ -37,7 +60,7 @@ Buka `/admin` untuk mengelola klaim secara manual: tab **Klaim** menampilkan sem
    ```
    `ADMIN_SESSION_SECRET` bertugas menandatangani cookie sesi admin (HMAC, berlaku 8 jam) — isi acak, jangan pernah dipakai ulang untuk keperluan lain.
 2. Tab pendaftar hanya berfungsi bila `EXNESS_LOGIN` dan `EXNESS_PASSWORD` sudah diisi.
-3. Menyetujui/menolak klaim akan mengubah status di repo GitHub Issues dan menambahkan catatan `manual_approve`/`manual_reject` pada riwayat pengecekan.
+3. Menyetujui/menolak klaim akan mengubah status di tabel `claims` Supabase dan menambahkan catatan `manual_approve`/`manual_reject` pada riwayat pengecekan; persetujuan juga otomatis menambahkan nomor akun ke file lisensi `PHOENIXALPHA`.
 
 ### Verifikasi Otomatis
 

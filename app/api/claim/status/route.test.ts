@@ -1,30 +1,27 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { ClaimRow } from "@/lib/claims";
 
-interface IssueState {
-  number: number;
-  title: string;
-  body: string;
-}
+const claimsMocks = vi.hoisted(() => ({
+  getClaimByAccount: vi.fn()
+}));
 
-const state: { issues: IssueState[] } = { issues: [] };
+vi.mock("@/lib/claims", () => ({ ...claimsMocks }));
 
-const fetchMock = vi.fn(async (url: unknown, init?: RequestInit): Promise<Response> => {
-  const method = (init?.method ?? "GET").toUpperCase();
-  const urlStr = String(url);
-  if (method === "GET" && urlStr.includes("/issues?")) {
-    return new Response(JSON.stringify(state.issues), { status: 200 });
-  }
-  return new Response(null, { status: 200 });
-});
-
-type RecordInput = Record<string, unknown>;
-
-function makeIssue(number: number, record: RecordInput): void {
-  state.issues.push({
-    number,
-    title: `[CLAIM] ${String(record.name)} — ${String(record.account)}`,
-    body: "```json\n" + JSON.stringify(record, null, 2) + "\n```"
-  });
+function row(account: string, status: ClaimRow["record"]["status"], reason: string | null): ClaimRow {
+  return {
+    id: 11,
+    record: {
+      name: "Budi",
+      email: "budi@example.com",
+      telegram: "",
+      account,
+      createdAt: "2026-08-26T00:00:00.000Z",
+      updatedAt: "2026-08-26T01:00:00.000Z",
+      status,
+      reason,
+      checks: []
+    }
+  };
 }
 
 async function get(account: string, ip: string): Promise<Response> {
@@ -39,104 +36,73 @@ async function get(account: string, ip: string): Promise<Response> {
 describe("GET /api/claim/status", () => {
   beforeEach(() => {
     vi.resetModules();
-    vi.stubGlobal("fetch", fetchMock);
-    process.env.GITHUB_TOKEN = "test-token";
-    process.env.GITHUB_REPO = "me/claims";
-    state.issues = [];
-    fetchMock.mockClear();
+    process.env.SUPABASE_URL = "https://example.supabase.co";
+    process.env.SUPABASE_SERVICE_ROLE_KEY = "service-key";
+    claimsMocks.getClaimByAccount.mockReset().mockResolvedValue(null);
   });
 
   afterEach(() => {
-    vi.unstubAllGlobals();
     vi.restoreAllMocks();
   });
 
   it("klaim tidak ada → status none", async () => {
     const res = await get("12345678", "1.1.1.1");
     const json = (await res.json()) as { ok: boolean; status: string };
+
     expect(res.status).toBe(200);
     expect(json).toEqual({ ok: true, status: "none" });
+    expect(claimsMocks.getClaimByAccount).toHaveBeenCalledWith("12345678");
   });
 
   it("klaim pending → status pending dengan reason null", async () => {
-    makeIssue(1, {
-      name: "Budi",
-      email: "budi@example.com",
-      telegram: "",
-      account: "12345678",
-      createdAt: "2026-08-26T00:00:00.000Z",
-      updatedAt: "2026-08-26T00:00:00.000Z",
-      status: "pending",
-      reason: null,
-      checks: []
-    });
+    claimsMocks.getClaimByAccount.mockResolvedValue(row("12345678", "pending", null));
+
     const res = await get("12345678", "2.2.2.2");
     const json = (await res.json()) as { ok: boolean; status: string; reason: string | null };
+
     expect(res.status).toBe(200);
     expect(json).toEqual({ ok: true, status: "pending", reason: null });
   });
 
-  it("klaim approved → status approved dengan reason", async () => {
-    makeIssue(7, {
-      name: "Budi",
-      email: "budi@example.com",
-      telegram: "",
-      account: "87654321",
-      createdAt: "2026-08-26T00:00:00.000Z",
-      updatedAt: "2026-08-26T01:00:00.000Z",
-      status: "approved",
-      reason: "deposit_ok",
-      checks: []
-    });
+  it("klaim approved → status approved dengan reason utuh", async () => {
+    claimsMocks.getClaimByAccount.mockResolvedValue(row("87654321", "approved", "deposit_ok"));
+
     const res = await get("87654321", "3.3.3.3");
     const json = (await res.json()) as { ok: boolean; status: string; reason: string | null };
+
     expect(res.status).toBe(200);
     expect(json).toEqual({ ok: true, status: "approved", reason: "deposit_ok" });
   });
 
-  it("reason manual disanitasi dan reason otomatis lolos utuh", async () => {
-    makeIssue(21, {
-      name: "Citra",
-      email: "citra@example.com",
-      telegram: "",
-      account: "11223344",
-      createdAt: "2026-08-26T00:00:00.000Z",
-      updatedAt: "2026-08-26T02:00:00.000Z",
-      status: "rejected",
-      reason: "manual_reject: kasar",
-      checks: []
-    });
-    makeIssue(22, {
-      name: "Dewi",
-      email: "dewi@example.com",
-      telegram: "",
-      account: "55667788",
-      createdAt: "2026-08-26T00:00:00.000Z",
-      updatedAt: "2026-08-26T01:00:00.000Z",
-      status: "approved",
-      reason: "balance_ok",
-      checks: []
-    });
-    const res1 = await get("11223344", "6.6.6.6");
-    const json1 = (await res1.json()) as { ok: boolean; status: string; reason: string | null };
-    expect(res1.status).toBe(200);
-    expect(json1).toEqual({ ok: true, status: "rejected", reason: "manual_reject" });
-    const res2 = await get("55667788", "7.7.7.7");
-    const json2 = (await res2.json()) as { ok: boolean; status: string; reason: string | null };
-    expect(res2.status).toBe(200);
-    expect(json2).toEqual({ ok: true, status: "approved", reason: "balance_ok" });
+  it("reason manual disanitasi", async () => {
+    claimsMocks.getClaimByAccount.mockResolvedValue(row("11223344", "rejected", "manual_reject: kasar"));
+
+    const res = await get("11223344", "4.4.4.4");
+    const json = (await res.json()) as { ok: boolean; status: string; reason: string | null };
+
+    expect(res.status).toBe(200);
+    expect(json).toEqual({ ok: true, status: "rejected", reason: "manual_reject" });
   });
 
-  it("parameter account tidak valid → 400 tanpa panggil github", async () => {
-    const res = await get("abc", "4.4.4.4");
+  it("parameter account tidak valid → 400 tanpa memanggil store", async () => {
+    const res = await get("abc", "5.5.5.5");
+
     expect(res.status).toBe(400);
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(claimsMocks.getClaimByAccount).not.toHaveBeenCalled();
   });
 
-  it("env github kosong → 503", async () => {
-    delete process.env.GITHUB_REPO;
-    const res = await get("12345678", "5.5.5.5");
+  it("env supabase kosong → 503", async () => {
+    delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const res = await get("12345678", "6.6.6.6");
+
     expect(res.status).toBe(503);
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(claimsMocks.getClaimByAccount).not.toHaveBeenCalled();
+  });
+
+  it("store gagal → 502", async () => {
+    claimsMocks.getClaimByAccount.mockRejectedValue(new Error("supabase_XX000"));
+    const res = await get("12345678", "7.7.7.7");
+
+    expect(res.status).toBe(502);
   });
 });

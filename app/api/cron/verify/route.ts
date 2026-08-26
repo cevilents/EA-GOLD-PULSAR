@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { listClaims, updateClaimResult, type StoredClaim } from "@/lib/claims";
+import { listClaims, updateClaimResult, type ClaimRow } from "@/lib/claims";
+import { appendLicensedAccount } from "@/lib/licence";
 import { evaluateRule, findClientAccount, getClientStats } from "@/lib/exness";
 
 export async function GET(request: Request): Promise<NextResponse> {
@@ -9,9 +10,9 @@ export async function GET(request: Request): Promise<NextResponse> {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  let pending: StoredClaim[];
+  let pending: ClaimRow[];
   try {
-    pending = await listClaims({ limit: 20, status: "pending", maxPages: 10 });
+    pending = await listClaims({ limit: 20, status: "pending" });
   } catch {
     console.error("cron list claims failed");
     return NextResponse.json({ error: "Gagal memuat klaim." }, { status: 502 });
@@ -39,7 +40,11 @@ export async function GET(request: Request): Promise<NextResponse> {
               }
             : undefined
         });
-        if (updated) approvedCount++;
+        if (updated) {
+          approvedCount++;
+          const licence = await appendLicensedAccount(claim.record.account);
+          if (licence === "failed") console.error("license file append failed");
+        }
       }
     } catch {
       continue;

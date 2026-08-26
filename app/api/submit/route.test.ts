@@ -11,43 +11,18 @@ vi.mock("@/lib/exness", () => ({
   ...exnessMocks
 }));
 
-interface IssueState {
-  number: number;
-  title: string;
-  body: string;
-}
+const claimsMocks = vi.hoisted(() => ({
+  createOrUpdateClaim: vi.fn(),
+  updateClaimResult: vi.fn()
+}));
 
-const state: { issues: IssueState[] } = { issues: [] };
+vi.mock("@/lib/claims", () => ({ ...claimsMocks }));
 
-const fetchMock = vi.fn(async (url: unknown, init?: RequestInit): Promise<Response> => {
-  const method = (init?.method ?? "GET").toUpperCase();
-  const urlStr = String(url);
-  if (method === "GET" && urlStr.includes("/issues?")) {
-    return new Response(JSON.stringify(state.issues), { status: 200 });
-  }
-  const payload: unknown = JSON.parse(String(init?.body ?? "{}"));
-  if (method === "POST") {
-    const record = payload as { title?: unknown; body?: unknown };
-    const issue: IssueState = {
-      number: state.issues.length + 1,
-      title: String(record.title ?? ""),
-      body: String(record.body ?? "")
-    };
-    state.issues.push(issue);
-    return new Response(JSON.stringify(issue), { status: 201 });
-  }
-  if (method === "PATCH") {
-    const parts = urlStr.split("/");
-    const numStr = parts[parts.length - 1];
-    const found = state.issues.find((issue) => String(issue.number) === numStr);
-    if (found) {
-      const record = payload as { body?: unknown };
-      found.body = String(record.body ?? "");
-    }
-    return new Response(JSON.stringify({ ok: true }), { status: 200 });
-  }
-  return new Response(null, { status: 200 });
-});
+const licenceMocks = vi.hoisted(() => ({
+  appendLicensedAccount: vi.fn()
+}));
+
+vi.mock("@/lib/licence", () => ({ ...licenceMocks }));
 
 async function post(body: unknown, ip: string): Promise<Response> {
   const { POST } = await import("./route");
@@ -60,12 +35,6 @@ async function post(body: unknown, ip: string): Promise<Response> {
   );
 }
 
-function patchCalls(): number {
-  return fetchMock.mock.calls.filter(
-    ([, init]) => String(init?.method ?? "GET").toUpperCase() === "PATCH"
-  ).length;
-}
-
 const validBody = {
   name: "Budi",
   email: "budi@example.com",
@@ -76,14 +45,14 @@ const validBody = {
 describe("POST /api/submit", () => {
   beforeEach(() => {
     vi.resetModules();
-    vi.stubGlobal("fetch", fetchMock);
-    process.env.GITHUB_TOKEN = "test-token";
-    process.env.GITHUB_REPO = "me/claims";
+    process.env.SUPABASE_URL = "https://example.supabase.co";
+    process.env.SUPABASE_SERVICE_ROLE_KEY = "service-key";
+    claimsMocks.createOrUpdateClaim.mockReset().mockResolvedValue({ account: validBody.account });
+    claimsMocks.updateClaimResult.mockReset().mockResolvedValue(true);
+    licenceMocks.appendLicensedAccount.mockReset().mockResolvedValue("appended");
     exnessMocks.findClientAccount.mockReset();
     exnessMocks.getClientStats.mockReset();
     exnessMocks.evaluateRule.mockReset();
-    state.issues = [];
-    fetchMock.mockClear();
   });
 
   afterEach(() => {
@@ -91,7 +60,7 @@ describe("POST /api/submit", () => {
     vi.restoreAllMocks();
   });
 
-  it("rule approved → respons approved dan issue dipatch berisi approved", async () => {
+  it("rule approved → updateClaimResult + lisensi ditambahkan + respons approved", async () => {
     exnessMocks.findClientAccount.mockResolvedValue({
       underPartner: true,
       clientUid: "uid-1",
@@ -114,12 +83,45 @@ describe("POST /api/submit", () => {
 
     expect(res.status).toBe(200);
     expect(json).toEqual({ ok: true, status: "approved" });
-    const patched = state.issues.find((issue) => issue.body.includes('"approved"'));
-    expect(patched).toBeTruthy();
-    expect(patchCalls()).toBeGreaterThanOrEqual(1);
+    expect(claimsMocks.createOrUpdateClaim).toHaveBeenCalledWith({
+      ...validBody,
+      telegram: "budi"
+    });
+    expect(claimsMocks.updateClaimResult).toHaveBeenCalledWith(
+      "12345678",
+      expect.objectContaining({ approved: true, reason: "deposit_ok" })
+    );
+    expect(licenceMocks.appendLicensedAccount).toHaveBeenCalledWith("12345678");
   });
 
-  it("underPartner tapi rule gagal → pending tanpa patch", async () => {
+  it("lisensi failed → tetap approved dengan catatan console", async () => {
+    exnessMocks.findClientAccount.mockResolvedValue({
+      underPartner: true,
+      clientUid: "uid-1",
+      accountType: "Standard"
+    });
+    exnessMocks.getClientStats.mockResolvedValue({
+      depositAmount: 150,
+      balance: 20,
+      ftdReceived: true
+    });
+    exnessMocks.evaluateRule.mockReturnValue({
+      approved: true,
+      reason: "deposit_ok",
+      requiredDeposit: 100,
+      requiredBalance: 50
+    });
+    licenceMocks.appendLicensedAccount.mockResolvedValue("failed");
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const res = await post(validBody, "2.2.2.2");
+    const json = (await res.json()) as { ok: boolean; status: string };
+
+    expect(json).toEqual({ ok: true, status: "approved" });
+    expect(errorSpy).toHaveBeenCalledWith("license file append failed");
+  });
+
+  it("underPartner tapi rule gagal → pending tanpa update/lisensi", async () => {
     exnessMocks.findClientAccount.mockResolvedValue({
       underPartner: true,
       clientUid: "uid-1",
@@ -137,46 +139,58 @@ describe("POST /api/submit", () => {
       requiredBalance: 50
     });
 
-    const res = await post(validBody, "2.2.2.2");
-    const json = (await res.json()) as { ok: boolean; status: string };
-
-    expect(res.status).toBe(200);
-    expect(json).toEqual({ ok: true, status: "pending" });
-    expect(patchCalls()).toBe(0);
-    expect(state.issues[0]?.body).toContain('"pending"');
-  });
-
-  it("exness error → tetap pending", async () => {
-    exnessMocks.findClientAccount.mockRejectedValue(new Error("boom"));
-
     const res = await post(validBody, "3.3.3.3");
     const json = (await res.json()) as { ok: boolean; status: string };
 
     expect(res.status).toBe(200);
     expect(json).toEqual({ ok: true, status: "pending" });
-    expect(exnessMocks.getClientStats).not.toHaveBeenCalled();
-    expect(patchCalls()).toBe(0);
+    expect(claimsMocks.updateClaimResult).not.toHaveBeenCalled();
+    expect(licenceMocks.appendLicensedAccount).not.toHaveBeenCalled();
   });
 
-  it("payload tidak valid → 400 tanpa panggil github/exness", async () => {
-    const res = await post({ name: "", email: "x", telegram: "", account: "1" }, "4.4.4.4");
+  it("exness error → tetap pending", async () => {
+    exnessMocks.findClientAccount.mockRejectedValue(new Error("boom"));
+    vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const res = await post(validBody, "4.4.4.4");
+    const json = (await res.json()) as { ok: boolean; status: string };
+
+    expect(res.status).toBe(200);
+    expect(json).toEqual({ ok: true, status: "pending" });
+    expect(exnessMocks.getClientStats).not.toHaveBeenCalled();
+    expect(claimsMocks.updateClaimResult).not.toHaveBeenCalled();
+  });
+
+  it("penyimpanan klaim gagal → 502", async () => {
+    claimsMocks.createOrUpdateClaim.mockRejectedValue(new Error("supabase_XX000"));
+    vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const res = await post(validBody, "5.5.5.5");
+
+    expect(res.status).toBe(502);
+    expect(exnessMocks.findClientAccount).not.toHaveBeenCalled();
+  });
+
+  it("payload tidak valid → 400 tanpa panggil store/exness", async () => {
+    const res = await post({ name: "", email: "x", telegram: "", account: "1" }, "6.6.6.6");
 
     expect(res.status).toBe(400);
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(claimsMocks.createOrUpdateClaim).not.toHaveBeenCalled();
     expect(exnessMocks.findClientAccount).not.toHaveBeenCalled();
   });
 
   it("honeypot terisi → 400", async () => {
-    const res = await post({ ...validBody, website: "spam" }, "5.5.5.5");
+    const res = await post({ ...validBody, website: "spam" }, "7.7.7.7");
 
     expect(res.status).toBe(400);
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(claimsMocks.createOrUpdateClaim).not.toHaveBeenCalled();
   });
 
-  it("env github kosong → 503", async () => {
-    delete process.env.GITHUB_TOKEN;
-    const res = await post(validBody, "6.6.6.6");
+  it("env supabase kosong → 503 tanpa menyentuh store", async () => {
+    delete process.env.SUPABASE_URL;
+    const res = await post(validBody, "8.8.8.8");
+
     expect(res.status).toBe(503);
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(claimsMocks.createOrUpdateClaim).not.toHaveBeenCalled();
   });
 });

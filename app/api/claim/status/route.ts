@@ -16,7 +16,7 @@ function sanitizeReason(reason: string | null): string | null {
 }
 
 export async function GET(request: Request): Promise<NextResponse> {
-  if (!process.env.GITHUB_TOKEN || !process.env.GITHUB_REPO) {
+  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
     return NextResponse.json({ error: "Layanan klaim belum dikonfigurasi." }, { status: 503 });
   }
 

@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { listClaims, updateClaimResult } from "@/lib/claims";
+import { appendLicensedAccount } from "@/lib/licence";
 import { readAdminCookie, verifySessionValue } from "@/lib/admin-auth";
 
 const ACCOUNT_PATTERN = /^\d{5,12}$/;
 const STATUSES = ["pending", "approved", "rejected"] as const;
-type StatusFilter = (typeof STATUSES)[number];
 
 function unauthorized(): NextResponse {
   return NextResponse.json({ error: "Tidak diizinkan." }, { status: 401 });
@@ -34,20 +34,21 @@ export async function GET(request: Request): Promise<NextResponse> {
   if (!verifySessionValue(readAdminCookie(request))) return unauthorized();
 
   const filter = new URL(request.url).searchParams.get("status");
+  const wanted = STATUSES.find((status) => status === filter);
   let claims;
   try {
-    claims = await listClaims({ limit: 100 });
-    if (filter !== null && (STATUSES as readonly string[]).includes(filter)) {
-      const wanted = filter as StatusFilter;
-      claims = claims.filter((item) => item.record.status === wanted);
-    }
+    claims =
+      wanted === undefined
+        ? await listClaims({ limit: 100 })
+        : await listClaims({ limit: 100, status: wanted });
   } catch {
+    console.error("admin list claims failed");
     return NextResponse.json({ error: "Gagal memuat klaim." }, { status: 502 });
   }
 
   return NextResponse.json({
     ok: true,
-    claims: claims.map(({ issueNumber, record }) => ({ issueNumber, ...record }))
+    claims: claims.map(({ id, record }) => ({ issueNumber: id, ...record }))
   });
 }
 
@@ -80,6 +81,12 @@ export async function PATCH(request: Request): Promise<NextResponse> {
 
   if (!updated) {
     return NextResponse.json({ error: "Klaim tidak ditemukan." }, { status: 404 });
+  }
+
+  if (parsed.action === "approve") {
+    const licenseFile = await appendLicensedAccount(parsed.account);
+    if (licenseFile === "failed") console.error("license file append failed");
+    return NextResponse.json({ ok: true, licenseFile });
   }
   return NextResponse.json({ ok: true });
 }

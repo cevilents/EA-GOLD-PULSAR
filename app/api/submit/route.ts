@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createOrUpdateClaim, updateClaimResult } from "@/lib/claims";
+import { appendLicensedAccount } from "@/lib/licence";
 import { evaluateRule, findClientAccount, getClientStats } from "@/lib/exness";
 import { checkRateLimit } from "@/lib/rateLimit";
 import { validateClaim } from "@/lib/validation";
@@ -15,7 +16,7 @@ function jsonError(status: number, error: string, fields?: unknown): NextRespons
 }
 
 export async function POST(request: Request): Promise<NextResponse> {
-  if (!process.env.GITHUB_TOKEN || !process.env.GITHUB_REPO) {
+  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
     return jsonError(503, "Layanan klaim belum dikonfigurasi.");
   }
 
@@ -38,7 +39,7 @@ export async function POST(request: Request): Promise<NextResponse> {
   try {
     await createOrUpdateClaim(result.value);
   } catch {
-    console.error("github claim storage failed");
+    console.error("claim storage failed");
     return jsonError(502, "Gagal menyimpan klaim. Silakan coba lagi.");
   }
 
@@ -61,6 +62,8 @@ export async function POST(request: Request): Promise<NextResponse> {
               }
             : undefined
         });
+        const licence = await appendLicensedAccount(result.value.account);
+        if (licence === "failed") console.error("license file append failed");
         finalStatus = "approved";
       }
     }

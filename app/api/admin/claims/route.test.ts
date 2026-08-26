@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { StoredClaim } from "@/lib/claims";
+import type { ClaimRow } from "@/lib/claims";
 import { createSessionValue } from "@/lib/admin-auth";
 
 vi.mock("@/lib/claims", () => ({
@@ -7,15 +7,21 @@ vi.mock("@/lib/claims", () => ({
   updateClaimResult: vi.fn()
 }));
 
+const licenceMocks = vi.hoisted(() => ({
+  appendLicensedAccount: vi.fn()
+}));
+
+vi.mock("@/lib/licence", () => ({ ...licenceMocks }));
+
 import { GET, PATCH } from "./route";
 import { listClaims, updateClaimResult } from "@/lib/claims";
 
 const listClaimsMock = vi.mocked(listClaims);
 const updateMock = vi.mocked(updateClaimResult);
 
-function claim(account: string, status: "pending" | "approved" | "rejected", updatedAt: string): StoredClaim {
+function claim(id: number, account: string, status: "pending" | "approved" | "rejected", updatedAt: string): ClaimRow {
   return {
-    issueNumber: 11,
+    id,
     record: {
       name: "Budi",
       email: "budi@example.com",
@@ -57,10 +63,11 @@ async function patch(body: unknown, rawCookie?: string): Promise<Response> {
 describe("GET /api/admin/claims", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    licenceMocks.appendLicensedAccount.mockReset().mockResolvedValue("appended");
     process.env.ADMIN_SESSION_SECRET = "secret-session-value";
     listClaimsMock.mockResolvedValue([
-      claim("12345678", "pending", "2026-08-26T02:00:00.000Z"),
-      claim("87654321", "approved", "2026-08-26T01:00:00.000Z")
+      claim(11, "12345678", "pending", "2026-08-26T02:00:00.000Z"),
+      claim(12, "87654321", "approved", "2026-08-26T01:00:00.000Z")
     ]);
   });
 
@@ -91,11 +98,21 @@ describe("GET /api/admin/claims", () => {
     expect(listClaimsMock).toHaveBeenCalledWith({ limit: 100 });
   });
 
-  it("filter status=approved → hanya approved", async () => {
+  it("filter status=approved → diteruskan ke listClaims", async () => {
+    listClaimsMock.mockImplementation(async (options) =>
+      options?.status === "approved" ? [claim(12, "87654321", "approved", "2026-08-26T01:00:00.000Z")] : []
+    );
     const res = await get(authCookie(), "?status=approved");
     const json = (await res.json()) as { claims: Array<{ status: string }> };
+    expect(res.status).toBe(200);
     expect(json.claims).toHaveLength(1);
     expect(json.claims[0].status).toBe("approved");
+    expect(listClaimsMock).toHaveBeenCalledWith({ limit: 100, status: "approved" });
+  });
+
+  it("filter tidak dikenal → tanpa status filter", async () => {
+    await get(authCookie(), "?status=bogus");
+    expect(listClaimsMock).toHaveBeenCalledWith({ limit: 100 });
   });
 });
 
@@ -104,6 +121,7 @@ describe("PATCH /api/admin/claims", () => {
     vi.clearAllMocks();
     process.env.ADMIN_SESSION_SECRET = "secret-session-value";
     updateMock.mockResolvedValue(true);
+    licenceMocks.appendLicensedAccount.mockReset().mockResolvedValue("appended");
   });
 
   it("guard tanpa cookie → 401 tanpa memanggil update", async () => {
@@ -123,28 +141,33 @@ describe("PATCH /api/admin/claims", () => {
     expect(res.status).toBe(400);
   });
 
-  it("approve → updateClaimResult dengan approved true + reason manual_approve", async () => {
+  it("approve → updateClaimResult + lisensi + licenseFile di respons", async () => {
     const res = await patch({ account: "12345678", action: "approve" }, authCookie());
-    const json = (await res.json()) as { ok: boolean };
+    const json = (await res.json()) as { ok: boolean; licenseFile?: string };
     expect(res.status).toBe(200);
-    expect(json).toEqual({ ok: true });
+    expect(json).toEqual({ ok: true, licenseFile: "appended" });
     expect(updateMock).toHaveBeenCalledWith("12345678", {
       approved: true,
       reason: "manual_approve"
     });
+    expect(licenceMocks.appendLicensedAccount).toHaveBeenCalledWith("12345678");
   });
 
-  it("reject + note → approved false + reason manual_reject: note", async () => {
-    await patch({ account: "12345678", action: "reject", note: "akun lama" }, authCookie());
+  it("reject + note → approved false tanpa lisensi", async () => {
+    const res = await patch({ account: "12345678", action: "reject", note: "akun lama" }, authCookie());
+    const json = (await res.json()) as { ok: boolean };
+    expect(json).toEqual({ ok: true });
     expect(updateMock).toHaveBeenCalledWith("12345678", {
       approved: false,
       reason: "manual_reject: akun lama"
     });
+    expect(licenceMocks.appendLicensedAccount).not.toHaveBeenCalled();
   });
 
-  it("klaim tidak ada → 404", async () => {
+  it("klaim tidak ada → 404 tanpa lisensi", async () => {
     updateMock.mockResolvedValue(false);
     const res = await patch({ account: "99999999", action: "approve" }, authCookie());
     expect(res.status).toBe(404);
+    expect(licenceMocks.appendLicensedAccount).not.toHaveBeenCalled();
   });
 });

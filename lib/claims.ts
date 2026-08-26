@@ -1,4 +1,6 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
 import type { ClaimFields } from "./validation";
+import { StoreError, createClaimStore } from "./supabase";
 
 export interface ClaimCheck {
   at: string;
@@ -22,8 +24,8 @@ export interface ClaimRecord {
   checks: ClaimCheck[];
 }
 
-export interface StoredClaim {
-  issueNumber: number;
+export interface ClaimRow {
+  id: number;
   record: ClaimRecord;
 }
 
@@ -45,45 +47,45 @@ export type ClaimStatus = ClaimRecord["status"];
 export interface ListClaimsOptions {
   limit?: number;
   status?: ClaimStatus;
-  maxPages?: number;
 }
 
-interface IssueSummary {
-  number: number;
-  title: string;
-  body: string | null;
+interface ClaimDbRow {
+  id?: unknown;
+  name?: unknown;
+  email?: unknown;
+  telegram?: unknown;
+  account?: unknown;
+  status?: unknown;
+  reason?: unknown;
+  checks?: unknown;
+  created_at?: unknown;
+  updated_at?: unknown;
 }
 
-const ISSUES_PER_PAGE = 100;
-const MAX_PAGES = 3;
-const CLAIM_PREFIX = "[CLAIM]";
-
-function requireRepo(): string {
-  const repo = process.env.GITHUB_REPO;
-  if (!repo) throw new Error("github_not_configured");
-  return repo;
+function wrapStoreError(error: { code?: unknown }): StoreError {
+  const code = typeof error.code === "string" && error.code.length > 0 ? error.code : "unknown";
+  return new StoreError(`supabase_${code}`);
 }
 
-async function githubFetch(path: string, init: RequestInit = {}): Promise<Response> {
-  const token = process.env.GITHUB_TOKEN;
-  return fetch(`https://api.github.com${path}`, {
-    ...init,
-    headers: {
-      ...(init.headers ?? {}),
-      Authorization: `Bearer ${token ?? ""}`,
-      Accept: "application/vnd.github+json",
-      "X-GitHub-Api-Version": "2022-11-28"
-    },
-    signal: AbortSignal.timeout(10_000)
-  });
-}
-
-async function githubJson(path: string, init?: RequestInit): Promise<unknown> {
-  const response = await githubFetch(path, init);
-  if (!response.ok) {
-    throw new Error(`github_http_${response.status}`);
+function asChecks(value: unknown): ClaimCheck[] {
+  if (!Array.isArray(value)) return [];
+  const checks: ClaimCheck[] = [];
+  for (const item of value) {
+    const record = asRecord(item);
+    if (!record) continue;
+    const at = record["at"];
+    const reason = record["reason"];
+    if (typeof at !== "string" || typeof reason !== "string") continue;
+    const check: ClaimCheck = { at, approved: record["approved"] === true, reason };
+    for (const key of ["depositAmount", "balance", "requiredDeposit", "requiredBalance"] as const) {
+      const metric = record[key];
+      if (typeof metric === "number" && Number.isFinite(metric)) {
+        check[key] = metric;
+      }
+    }
+    checks.push(check);
   }
-  return response.json();
+  return checks;
 }
 
 function asRecord(value: unknown): Record<string, unknown> | null {
@@ -92,155 +94,108 @@ function asRecord(value: unknown): Record<string, unknown> | null {
     : null;
 }
 
-export function encodeClaimBody(record: ClaimRecord): string {
-  return `\`\`\`json\n${JSON.stringify(record, null, 2)}\n\`\`\``;
+function normalizeStatus(value: unknown): ClaimStatus {
+  if (value === "approved" || value === "rejected") return value;
+  return "pending";
 }
 
-export function parseClaimBody(body: string): ClaimRecord | null {
-  const match = body.match(/```json\s*([\s\S]*?)```/);
-  if (!match) return null;
-  try {
-    const parsed: unknown = JSON.parse(match[1]);
-    const record = asRecord(parsed);
-    if (!record) return null;
-    const account = record["account"];
-    const status = record["status"];
-    if (typeof account !== "string" || account.length === 0) return null;
-    if (status !== "pending" && status !== "approved" && status !== "rejected") return null;
-    return record as unknown as ClaimRecord;
-  } catch {
-    return null;
+function str(value: unknown): string {
+  return typeof value === "string" ? value : "";
+}
+
+function toRecord(row: ClaimDbRow): ClaimRecord {
+  return {
+    name: str(row.name),
+    email: str(row.email),
+    telegram: str(row.telegram),
+    account: str(row.account),
+    createdAt: str(row.created_at),
+    updatedAt: str(row.updated_at),
+    status: normalizeStatus(row.status),
+    reason: typeof row.reason === "string" ? row.reason : null,
+    checks: asChecks(row.checks)
+  };
+}
+
+async function fetchByAccount(
+  client: SupabaseClient,
+  account: string,
+  columns: string
+): Promise<ClaimDbRow | null> {
+  const { data, error } = await client.from("claims").select(columns).eq("account", account).maybeSingle();
+  if (error) throw wrapStoreError(asRecord(error) ?? {});
+  if (data === null || data === undefined) return null;
+  return asRecord(data) ?? null;
+}
+
+export async function createOrUpdateClaim(fields: ClaimFields): Promise<{ account: string }> {
+  const client = createClaimStore();
+  const existing = await fetchByAccount(client, fields.account, "id");
+  const now = new Date().toISOString();
+  if (existing) {
+    const { error } = await client
+      .from("claims")
+      .update({
+        name: fields.name,
+        email: fields.email,
+        telegram: fields.telegram,
+        updated_at: now
+      })
+      .eq("account", fields.account);
+    if (error) throw wrapStoreError(asRecord(error) ?? {});
+    return { account: fields.account };
   }
+  const { error } = await client.from("claims").insert([
+    {
+      name: fields.name,
+      email: fields.email,
+      telegram: fields.telegram,
+      account: fields.account,
+      status: "pending"
+    }
+  ]);
+  if (error) throw wrapStoreError(asRecord(error) ?? {});
+  return { account: fields.account };
 }
 
-async function listIssues(repo: string, state: "open" | "all", page: number): Promise<IssueSummary[]> {
-  const payload = await githubJson(
-    `/repos/${repo}/issues?state=${state}&per_page=${ISSUES_PER_PAGE}&page=${page}`
-  );
-  if (!Array.isArray(payload)) return [];
-  const issues: IssueSummary[] = [];
-  for (const item of payload) {
+export async function getClaimByAccount(account: string): Promise<ClaimRow | null> {
+  const client = createClaimStore();
+  const row = await fetchByAccount(client, account, "*");
+  if (row === null) return null;
+  return { id: typeof row.id === "number" ? row.id : 0, record: toRecord(row) };
+}
+
+export async function listClaims(options: ListClaimsOptions = {}): Promise<ClaimRow[]> {
+  const client = createClaimStore();
+  let query = client.from("claims").select("*");
+  if (options.status !== undefined) {
+    query = query.eq("status", options.status);
+  }
+  const { data, error } = await query
+    .order("updated_at", { ascending: false })
+    .limit(options.limit ?? 50);
+  if (error) throw wrapStoreError(asRecord(error) ?? {});
+  if (!Array.isArray(data)) return [];
+  const rows: ClaimRow[] = [];
+  for (const item of data) {
     const record = asRecord(item);
-    if (!record || typeof record["title"] !== "string") continue;
-    issues.push({
-      number: Number(record["number"]),
-      title: record["title"],
-      body: typeof record["body"] === "string" ? record["body"] : null
+    if (!record) continue;
+    rows.push({
+      id: typeof record["id"] === "number" ? record["id"] : 0,
+      record: toRecord(record)
     });
   }
-  return issues;
-}
-
-interface ScannedClaim extends StoredClaim {
-  account: string;
-}
-
-async function scanClaims(state: "open" | "all"): Promise<ScannedClaim[]> {
-  const repo = requireRepo();
-  const found: ScannedClaim[] = [];
-  for (let page = 1; page <= MAX_PAGES; page++) {
-    const issues = await listIssues(repo, state, page);
-    for (const issue of issues) {
-      if (!issue.title.startsWith(CLAIM_PREFIX) || issue.body === null) continue;
-      const record = parseClaimBody(issue.body);
-      if (!record) continue;
-      found.push({ issueNumber: issue.number, record, account: record.account });
-    }
-    if (issues.length < ISSUES_PER_PAGE) break;
-  }
-  return found;
-}
-
-async function patchIssueBody(repo: string, issueNumber: number, body: string): Promise<void> {
-  await githubJson(`/repos/${repo}/issues/${issueNumber}`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ body })
-  });
-}
-
-export async function createOrUpdateClaim(fields: ClaimFields): Promise<StoredClaim> {
-  const repo = requireRepo();
-  const scanned = await scanClaims("open");
-  const existing = scanned.find((claim) => claim.account === fields.account);
-  const now = new Date().toISOString();
-
-  if (existing) {
-    const merged: ClaimRecord = {
-      ...fields,
-      createdAt: existing.record.createdAt,
-      updatedAt: now,
-      status: existing.record.status,
-      reason: existing.record.reason,
-      checks: existing.record.checks
-    };
-    await patchIssueBody(repo, existing.issueNumber, encodeClaimBody(merged));
-    return { issueNumber: existing.issueNumber, record: merged };
-  }
-
-  const created: ClaimRecord = {
-    ...fields,
-    createdAt: now,
-    updatedAt: now,
-    status: "pending",
-    reason: null,
-    checks: []
-  };
-  const payload = asRecord(
-    await githubJson(`/repos/${repo}/issues`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        title: `${CLAIM_PREFIX} ${fields.name} — ${fields.account}`,
-        body: encodeClaimBody(created)
-      })
-    })
-  );
-  return { issueNumber: Number(payload?.["number"] ?? 0), record: created };
-}
-
-export async function getClaimByAccount(account: string): Promise<StoredClaim | null> {
-  const scanned = await scanClaims("open");
-  const found = scanned.find((claim) => claim.account === account);
-  if (!found) return null;
-  return { issueNumber: found.issueNumber, record: found.record };
-}
-
-export async function listClaims(options: ListClaimsOptions = {}): Promise<StoredClaim[]> {
-  const limit = options.limit ?? 50;
-  const status = options.status;
-  const maxPages = options.maxPages ?? MAX_PAGES;
-  const repo = requireRepo();
-  const found: ScannedClaim[] = [];
-  outer: for (let page = 1; page <= maxPages; page++) {
-    const issues = await listIssues(repo, "all", page);
-    for (const issue of issues) {
-      if (!issue.title.startsWith(CLAIM_PREFIX) || issue.body === null) continue;
-      const record = parseClaimBody(issue.body);
-      if (!record) continue;
-      if (status !== undefined && record.status !== status) continue;
-      found.push({ issueNumber: issue.number, record, account: record.account });
-      if (status !== undefined && found.length >= limit) break outer;
-    }
-    if (issues.length < ISSUES_PER_PAGE) break;
-  }
-  return found
-    .sort((a, b) => {
-      if (a.record.updatedAt === b.record.updatedAt) return 0;
-      return a.record.updatedAt < b.record.updatedAt ? 1 : -1;
-    })
-    .slice(0, limit)
-    .map(({ issueNumber, record }) => ({ issueNumber, record }));
+  return rows;
 }
 
 export async function updateClaimResult(
   account: string,
   result: ClaimResultInput
 ): Promise<boolean> {
-  const repo = requireRepo();
-  const scanned = await scanClaims("open");
-  const existing = scanned.find((claim) => claim.account === account);
-  if (!existing) return false;
+  const client = createClaimStore();
+  const existing = await fetchByAccount(client, account, "checks");
+  if (existing === null) return false;
+  const previous = asChecks(existing.checks);
   const now = new Date().toISOString();
   const check: ClaimCheck = { at: now, approved: result.approved, reason: result.reason };
   if (result.metrics?.depositAmount !== undefined) {
@@ -255,13 +210,15 @@ export async function updateClaimResult(
   if (result.metrics?.requiredBalance !== undefined) {
     check.requiredBalance = result.metrics.requiredBalance;
   }
-  const updated: ClaimRecord = {
-    ...existing.record,
-    updatedAt: now,
-    status: result.approved ? "approved" : "rejected",
-    reason: result.reason,
-    checks: [...existing.record.checks, check]
-  };
-  await patchIssueBody(repo, existing.issueNumber, encodeClaimBody(updated));
+  const { error } = await client
+    .from("claims")
+    .update({
+      status: result.approved ? ("approved" as const) : ("rejected" as const),
+      reason: result.reason,
+      checks: [...previous, check],
+      updated_at: now
+    })
+    .eq("account", account);
+  if (error) throw wrapStoreError(asRecord(error) ?? {});
   return true;
 }
