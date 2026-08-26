@@ -36,7 +36,7 @@ export async function GET(request: Request): Promise<NextResponse> {
   const filter = new URL(request.url).searchParams.get("status");
   let claims;
   try {
-    claims = await listClaims(100);
+    claims = await listClaims({ limit: 100 });
     if (filter !== null && (STATUSES as readonly string[]).includes(filter)) {
       const wanted = filter as StatusFilter;
       claims = claims.filter((item) => item.record.status === wanted);

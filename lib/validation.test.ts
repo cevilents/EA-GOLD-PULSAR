@@ -46,6 +46,13 @@ describe("validateClaim", () => {
     expect(r.ok && r.value.name).toBe("Budi Santoso");
   });
 
+  it("mengganti backtick pada nama dengan apostrof", () => {
+    const r = validateClaim({ ...base, name: "Budi```Santoso" });
+    expect(r.ok).toBe(true);
+    expect(r.ok && r.value.name.includes("`")).toBe(false);
+    expect(r.ok && r.value.name).not.toContain("`");
+  });
+
   it("menolak nama terlalu pendek/panjang", () => {
     const r1 = validateClaim({ ...base, name: "B" });
     const r2 = validateClaim({ ...base, name: "B".repeat(61) });

@@ -5,6 +5,13 @@ import { useCallback, useEffect, useState, type FormEvent } from "react";
 type ClaimStatus = "pending" | "approved" | "rejected";
 type Tab = "klaim" | "pendaftar";
 
+interface CheckMetrics {
+  depositAmount?: number;
+  balance?: number;
+  requiredDeposit?: number;
+  requiredBalance?: number;
+}
+
 interface ClaimRow {
   issueNumber: number;
   name: string;
@@ -13,6 +20,8 @@ interface ClaimRow {
   account: string;
   updatedAt: string;
   status: ClaimStatus;
+  reason: string | null;
+  lastMetrics: CheckMetrics | null;
 }
 
 interface ClientRow {
@@ -56,6 +65,44 @@ function numField(record: Record<string, unknown>, key: string): number {
   return Number.isFinite(value) ? value : 0;
 }
 
+function optNum(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
+function lastCheckMetrics(record: Record<string, unknown>): CheckMetrics | null {
+  const checks = record["checks"];
+  if (!Array.isArray(checks) || checks.length === 0) return null;
+  const last = checks[checks.length - 1];
+  if (typeof last !== "object" || last === null || Array.isArray(last)) return null;
+  const check = last as Record<string, unknown>;
+  const metrics: CheckMetrics = {
+    depositAmount: optNum(check["depositAmount"]),
+    balance: optNum(check["balance"]),
+    requiredDeposit: optNum(check["requiredDeposit"]),
+    requiredBalance: optNum(check["requiredBalance"])
+  };
+  if (
+    metrics.depositAmount === undefined &&
+    metrics.balance === undefined &&
+    metrics.requiredDeposit === undefined &&
+    metrics.requiredBalance === undefined
+  ) {
+    return null;
+  }
+  return metrics;
+}
+
+function metricsLine(metrics: CheckMetrics): string {
+  const parts: string[] = [];
+  if (metrics.depositAmount !== undefined && metrics.requiredDeposit !== undefined) {
+    parts.push(`D:${metrics.depositAmount}/${metrics.requiredDeposit}`);
+  }
+  if (metrics.balance !== undefined && metrics.requiredBalance !== undefined) {
+    parts.push(`S:${metrics.balance}/${metrics.requiredBalance}`);
+  }
+  return parts.join(" ");
+}
+
 function asClaimRows(payload: unknown): ClaimRow[] {
   if (typeof payload !== "object" || payload === null) return [];
   const claims = (payload as Record<string, unknown>)["claims"];
@@ -71,6 +118,7 @@ function asClaimRows(payload: unknown): ClaimRow[] {
     ) {
       continue;
     }
+    const reason = record["reason"];
     rows.push({
       issueNumber: numField(record, "issueNumber"),
       name: strField(record, "name"),
@@ -78,7 +126,9 @@ function asClaimRows(payload: unknown): ClaimRow[] {
       telegram: strField(record, "telegram"),
       account: strField(record, "account"),
       updatedAt: strField(record, "updatedAt"),
-      status
+      status,
+      reason: typeof reason === "string" ? reason : null,
+      lastMetrics: lastCheckMetrics(record)
     });
   }
   return rows;
@@ -423,46 +473,57 @@ export default function AdminPage() {
                     <th className={thClass}>Telegram</th>
                     <th className={thClass}>Akun</th>
                     <th className={thClass}>Status</th>
+                    <th className={thClass}>Alasan</th>
                     <th className={thClass}>Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {claims.map((claim) => (
-                    <tr key={claim.issueNumber} className="border-b border-white/5">
-                      <td className={tdClass}>{formatTime(claim.updatedAt)}</td>
-                      <td className={`${tdClass} font-semibold text-white`}>{claim.name}</td>
-                      <td className={tdClass}>{claim.email}</td>
-                      <td className={tdClass}>{claim.telegram === "" ? "–" : claim.telegram}</td>
-                      <td className={`${tdClass} font-mono`}>{claim.account}</td>
-                      <td className={tdClass}>
-                        <span
-                          className={`inline-block rounded-full border px-2.5 py-0.5 text-xs font-semibold ${STATUS_BADGE[claim.status]}`}
-                        >
-                          {STATUS_LABEL[claim.status]}
-                        </span>
-                      </td>
-                      <td className={tdClass}>
-                        <div className="flex gap-2">
-                          <button
-                            type="button"
-                            onClick={() => void handleAction(claim.account, "approve")}
-                            disabled={busyAccount !== ""}
-                            className="rounded-lg border border-emerald-500/40 px-2.5 py-1 text-xs font-semibold text-emerald-300 transition enabled:hover:bg-emerald-500/10 disabled:cursor-not-allowed disabled:opacity-50"
+                  {claims.map((claim) => {
+                    const metricsText =
+                      claim.lastMetrics === null ? "" : metricsLine(claim.lastMetrics);
+                    return (
+                      <tr key={claim.issueNumber} className="border-b border-white/5">
+                        <td className={tdClass}>{formatTime(claim.updatedAt)}</td>
+                        <td className={`${tdClass} font-semibold text-white`}>{claim.name}</td>
+                        <td className={tdClass}>{claim.email}</td>
+                        <td className={tdClass}>{claim.telegram === "" ? "–" : claim.telegram}</td>
+                        <td className={`${tdClass} font-mono`}>{claim.account}</td>
+                        <td className={tdClass}>
+                          <span
+                            className={`inline-block rounded-full border px-2.5 py-0.5 text-xs font-semibold ${STATUS_BADGE[claim.status]}`}
                           >
-                            {busyAccount === claim.account ? "…" : "Setujui"}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => void handleAction(claim.account, "reject")}
-                            disabled={busyAccount !== ""}
-                            className="rounded-lg border border-red-500/40 px-2.5 py-1 text-xs font-semibold text-red-300 transition enabled:hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-50"
-                          >
-                            Tolak
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                            {STATUS_LABEL[claim.status]}
+                          </span>
+                        </td>
+                        <td className={tdClass}>
+                          <div>{claim.reason ?? "–"}</div>
+                          {metricsText.length > 0 && (
+                            <div className="text-xs text-zinc-500">{metricsText}</div>
+                          )}
+                        </td>
+                        <td className={tdClass}>
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              onClick={() => void handleAction(claim.account, "approve")}
+                              disabled={busyAccount !== ""}
+                              className="rounded-lg border border-emerald-500/40 px-2.5 py-1 text-xs font-semibold text-emerald-300 transition enabled:hover:bg-emerald-500/10 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              {busyAccount === claim.account ? "…" : "Setujui"}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => void handleAction(claim.account, "reject")}
+                              disabled={busyAccount !== ""}
+                              className="rounded-lg border border-red-500/40 px-2.5 py-1 text-xs font-semibold text-red-300 transition enabled:hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              Tolak
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

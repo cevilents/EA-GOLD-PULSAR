@@ -51,7 +51,15 @@ export async function POST(request: Request): Promise<NextResponse> {
       if (verdict.approved) {
         await updateClaimResult(result.value.account, {
           approved: true,
-          reason: verdict.reason
+          reason: verdict.reason,
+          metrics: stats
+            ? {
+                depositAmount: stats.depositAmount,
+                balance: stats.balance,
+                requiredDeposit: verdict.requiredDeposit,
+                requiredBalance: verdict.requiredBalance
+              }
+            : undefined
         });
         finalStatus = "approved";
       }

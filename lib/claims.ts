@@ -4,6 +4,10 @@ export interface ClaimCheck {
   at: string;
   approved: boolean;
   reason: string;
+  depositAmount?: number;
+  balance?: number;
+  requiredDeposit?: number;
+  requiredBalance?: number;
 }
 
 export interface ClaimRecord {
@@ -23,9 +27,25 @@ export interface StoredClaim {
   record: ClaimRecord;
 }
 
+export interface VerdictMetrics {
+  depositAmount?: number;
+  balance?: number;
+  requiredDeposit?: number;
+  requiredBalance?: number;
+}
+
 export interface ClaimResultInput {
   approved: boolean;
   reason: string;
+  metrics?: VerdictMetrics;
+}
+
+export type ClaimStatus = ClaimRecord["status"];
+
+export interface ListClaimsOptions {
+  limit?: number;
+  status?: ClaimStatus;
+  maxPages?: number;
 }
 
 interface IssueSummary {
@@ -186,9 +206,25 @@ export async function getClaimByAccount(account: string): Promise<StoredClaim | 
   return { issueNumber: found.issueNumber, record: found.record };
 }
 
-export async function listClaims(limit = 50): Promise<StoredClaim[]> {
-  const scanned = await scanClaims("all");
-  return scanned
+export async function listClaims(options: ListClaimsOptions = {}): Promise<StoredClaim[]> {
+  const limit = options.limit ?? 50;
+  const status = options.status;
+  const maxPages = options.maxPages ?? MAX_PAGES;
+  const repo = requireRepo();
+  const found: ScannedClaim[] = [];
+  outer: for (let page = 1; page <= maxPages; page++) {
+    const issues = await listIssues(repo, "all", page);
+    for (const issue of issues) {
+      if (!issue.title.startsWith(CLAIM_PREFIX) || issue.body === null) continue;
+      const record = parseClaimBody(issue.body);
+      if (!record) continue;
+      if (status !== undefined && record.status !== status) continue;
+      found.push({ issueNumber: issue.number, record, account: record.account });
+      if (status !== undefined && found.length >= limit) break outer;
+    }
+    if (issues.length < ISSUES_PER_PAGE) break;
+  }
+  return found
     .sort((a, b) => {
       if (a.record.updatedAt === b.record.updatedAt) return 0;
       return a.record.updatedAt < b.record.updatedAt ? 1 : -1;
@@ -206,15 +242,25 @@ export async function updateClaimResult(
   const existing = scanned.find((claim) => claim.account === account);
   if (!existing) return false;
   const now = new Date().toISOString();
+  const check: ClaimCheck = { at: now, approved: result.approved, reason: result.reason };
+  if (result.metrics?.depositAmount !== undefined) {
+    check.depositAmount = result.metrics.depositAmount;
+  }
+  if (result.metrics?.balance !== undefined) {
+    check.balance = result.metrics.balance;
+  }
+  if (result.metrics?.requiredDeposit !== undefined) {
+    check.requiredDeposit = result.metrics.requiredDeposit;
+  }
+  if (result.metrics?.requiredBalance !== undefined) {
+    check.requiredBalance = result.metrics.requiredBalance;
+  }
   const updated: ClaimRecord = {
     ...existing.record,
     updatedAt: now,
     status: result.approved ? "approved" : "rejected",
     reason: result.reason,
-    checks: [
-      ...existing.record.checks,
-      { at: now, approved: result.approved, reason: result.reason }
-    ]
+    checks: [...existing.record.checks, check]
   };
   await patchIssueBody(repo, existing.issueNumber, encodeClaimBody(updated));
   return true;

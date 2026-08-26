@@ -2,8 +2,6 @@ import { NextResponse } from "next/server";
 import { listClaims, updateClaimResult, type StoredClaim } from "@/lib/claims";
 import { evaluateRule, findClientAccount, getClientStats } from "@/lib/exness";
 
-const MAX_PER_RUN = 20;
-
 export async function GET(request: Request): Promise<NextResponse> {
   const secret = process.env.CRON_SECRET;
   const authorization = request.headers.get("authorization");
@@ -13,9 +11,7 @@ export async function GET(request: Request): Promise<NextResponse> {
 
   let pending: StoredClaim[];
   try {
-    pending = (await listClaims())
-      .filter((claim) => claim.record.status === "pending")
-      .slice(0, MAX_PER_RUN);
+    pending = await listClaims({ limit: 20, status: "pending", maxPages: 10 });
   } catch {
     console.error("cron list claims failed");
     return NextResponse.json({ error: "Gagal memuat klaim." }, { status: 502 });
@@ -33,7 +29,15 @@ export async function GET(request: Request): Promise<NextResponse> {
       if (verdict.approved) {
         const updated = await updateClaimResult(claim.record.account, {
           approved: true,
-          reason: verdict.reason
+          reason: verdict.reason,
+          metrics: stats
+            ? {
+                depositAmount: stats.depositAmount,
+                balance: stats.balance,
+                requiredDeposit: verdict.requiredDeposit,
+                requiredBalance: verdict.requiredBalance
+              }
+            : undefined
         });
         if (updated) approvedCount++;
       }

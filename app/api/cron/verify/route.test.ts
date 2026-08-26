@@ -23,7 +23,10 @@ const fetchMock = vi.fn(async (url: unknown, init?: RequestInit): Promise<Respon
   const method = (init?.method ?? "GET").toUpperCase();
   const urlStr = String(url);
   if (method === "GET" && urlStr.includes("/issues?")) {
-    return new Response(JSON.stringify(state.issues), { status: 200 });
+    const pageMatch = urlStr.match(/[?&]page=(\d+)/);
+    const page = pageMatch ? Number(pageMatch[1]) : 1;
+    const start = (page - 1) * 100;
+    return new Response(JSON.stringify(state.issues.slice(start, start + 100)), { status: 200 });
   }
   if (method === "PATCH") {
     const parts = urlStr.split("/");
@@ -124,5 +127,48 @@ describe("GET /api/cron/verify", () => {
     const patched = state.issues.find((issue) => issue.number === 1);
     expect(patched?.body).toContain('"approved"');
     expect(state.issues.find((issue) => issue.number === 2)?.body).toContain('"pending"');
+  });
+
+  it("pending di halaman lama tetap terjangkau lewat paginasi status", async () => {
+    const issues: IssueState[] = [];
+    for (let i = 1; i <= 100; i++) {
+      const account = String(10000000 + i);
+      issues.push({
+        number: i,
+        title: `[CLAIM] Lama ${account}`,
+        body:
+          "```json\n" +
+          JSON.stringify(
+            { ...pendingRecord(account, "2026-08-25T00:00:00.000Z"), status: "approved" },
+            null,
+            2
+          ) +
+          "\n```"
+      });
+    }
+    for (let i = 101; i <= 120; i++) {
+      const account = String(20000000 + i);
+      issues.push({
+        number: i,
+        title: `[CLAIM] Baru ${account}`,
+        body:
+          "```json\n" +
+          JSON.stringify(pendingRecord(account, "2026-08-26T03:00:00.000Z"), null, 2) +
+          "\n```"
+      });
+    }
+    state.issues = issues;
+    exnessMocks.findClientAccount.mockResolvedValue({
+      underPartner: false,
+      clientUid: null,
+      accountType: null
+    });
+
+    const res = await callGet("Bearer cron-secret");
+    const json = (await res.json()) as { ok: boolean; checked: number; approved: number };
+
+    expect(res.status).toBe(200);
+    expect(json).toEqual({ ok: true, checked: 20, approved: 0 });
+    expect(exnessMocks.findClientAccount).toHaveBeenCalledTimes(20);
   });
 });

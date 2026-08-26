@@ -88,7 +88,7 @@ describe("GET /api/admin/claims", () => {
       name: "Budi"
     });
     expect(json.claims).toHaveLength(2);
-    expect(listClaimsMock).toHaveBeenCalledWith(100);
+    expect(listClaimsMock).toHaveBeenCalledWith({ limit: 100 });
   });
 
   it("filter status=approved → hanya approved", async () => {

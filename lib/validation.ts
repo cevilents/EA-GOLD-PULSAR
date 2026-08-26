@@ -42,6 +42,7 @@ export function validateClaim(raw: unknown): ClaimValidationResult {
   const errors: FieldErrors = {};
   const name = readString(record, "name")
     .replace(/[\r\n\t]+/g, " ")
+    .replace(/\x60/g, "'")
     .trim();
   const email = readString(record, "email")
     .trim()

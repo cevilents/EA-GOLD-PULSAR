@@ -41,7 +41,7 @@ Buka `/admin` untuk mengelola klaim secara manual: tab **Klaim** menampilkan sem
 
 ### Verifikasi Otomatis
 
-Klaim pending diverifikasi ulang otomatis tiap 30 menit oleh Vercel Cron yang memanggil `/api/cron/verify` dengan header `Authorization: Bearer $CRON_SECRET`. Set `CRON_SECRET=string-acak` di environment variables Vercel. Verifikasi pertama juga terjadi langsung saat submit.
+Klaim pending diverifikasi ulang otomatis tiap 30 menit oleh Vercel Cron yang memanggil `/api/cron/verify` dengan header `Authorization: Bearer $CRON_SECRET`. Set `CRON_SECRET=string-acak` di environment variables Vercel. Verifikasi pertama juga terjadi langsung saat submit. Vercel Hobby hanya mengizinkan cron harian — jadwal `*/30 * * * *` membutuhkan plan Pro; pengguna Hobby bisa mengubah `schedule` di `vercel.json` menjadi harian atau menyetujui klaim manual lewat `/admin`.
 
 ## Mengubah Daftar EA
 

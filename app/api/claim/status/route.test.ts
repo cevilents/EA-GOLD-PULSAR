@@ -94,6 +94,39 @@ describe("GET /api/claim/status", () => {
     expect(json).toEqual({ ok: true, status: "approved", reason: "deposit_ok" });
   });
 
+  it("reason manual disanitasi dan reason otomatis lolos utuh", async () => {
+    makeIssue(21, {
+      name: "Citra",
+      email: "citra@example.com",
+      telegram: "",
+      account: "11223344",
+      createdAt: "2026-08-26T00:00:00.000Z",
+      updatedAt: "2026-08-26T02:00:00.000Z",
+      status: "rejected",
+      reason: "manual_reject: kasar",
+      checks: []
+    });
+    makeIssue(22, {
+      name: "Dewi",
+      email: "dewi@example.com",
+      telegram: "",
+      account: "55667788",
+      createdAt: "2026-08-26T00:00:00.000Z",
+      updatedAt: "2026-08-26T01:00:00.000Z",
+      status: "approved",
+      reason: "balance_ok",
+      checks: []
+    });
+    const res1 = await get("11223344", "6.6.6.6");
+    const json1 = (await res1.json()) as { ok: boolean; status: string; reason: string | null };
+    expect(res1.status).toBe(200);
+    expect(json1).toEqual({ ok: true, status: "rejected", reason: "manual_reject" });
+    const res2 = await get("55667788", "7.7.7.7");
+    const json2 = (await res2.json()) as { ok: boolean; status: string; reason: string | null };
+    expect(res2.status).toBe(200);
+    expect(json2).toEqual({ ok: true, status: "approved", reason: "balance_ok" });
+  });
+
   it("parameter account tidak valid → 400 tanpa panggil github", async () => {
     const res = await get("abc", "4.4.4.4");
     expect(res.status).toBe(400);

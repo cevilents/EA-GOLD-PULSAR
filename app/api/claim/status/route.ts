@@ -10,6 +10,11 @@ function clientIp(request: Request): string {
 
 const ACCOUNT_PATTERN = /^\d{5,12}$/;
 
+function sanitizeReason(reason: string | null): string | null {
+  if (reason === null || !reason.startsWith("manual_")) return reason;
+  return reason.split(":")[0];
+}
+
 export async function GET(request: Request): Promise<NextResponse> {
   if (!process.env.GITHUB_TOKEN || !process.env.GITHUB_REPO) {
     return NextResponse.json({ error: "Layanan klaim belum dikonfigurasi." }, { status: 503 });
@@ -40,6 +45,6 @@ export async function GET(request: Request): Promise<NextResponse> {
   return NextResponse.json({
     ok: true,
     status: claim.record.status,
-    reason: claim.record.reason
+    reason: sanitizeReason(claim.record.reason)
   });
 }
