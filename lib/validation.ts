@@ -46,7 +46,8 @@ export function validateClaim(raw: unknown): ClaimValidationResult {
     .trim();
   const email = readString(record, "email")
     .trim()
-    .toLowerCase();
+    .toLowerCase()
+    .replace(/\x60/g, "");
   const telegramRaw = readString(record, "telegram").trim();
   const account = readString(record, "account").trim();
 
