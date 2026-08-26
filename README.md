@@ -30,6 +30,10 @@ Tanpa kedua variabel itu, form mengembalikan pesan "layanan belum dikonfigurasi"
 
 Edit satu file: `data/eas.ts`. Nama `file` harus sama persis dengan nama file yang kamu unggah.
 
+## Kontak Support
+
+Ganti nilai `WHATSAPP_SUPPORT` di `data/eas.ts` dengan link WhatsApp admin asli (format `https://wa.me/62xxxxxxxxxx`). Link ini dipakai footer sebagai kanal bantuan pengunjung.
+
 ## Menambahkan File EA
 
 Taruh file `.ex4`/`.ex5` + setting ke folder `public/downloads/` dengan nama yang cocok dengan kolom `file` di `data/eas.ts`. Contoh: `public/downloads/PulsarScalperXAU.ex5`. File yang belum diunggah akan 404 saat diunduh.

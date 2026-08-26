@@ -53,7 +53,8 @@ export async function POST(request: Request): Promise<NextResponse> {
       },
       body: JSON.stringify({
         title: `[CLAIM] ${name} — ${account}`,
-        body: issueBody
+        body: issueBody,
+        labels: ["claim"]
       }),
       signal: AbortSignal.timeout(10_000)
     });

@@ -116,7 +116,10 @@ export default function CandleChart() {
 
     const onVisibility = (): void => {
       running = document.visibilityState === "visible";
-      if (running) tick(performance.now());
+      if (running) {
+        cancelAnimationFrame(raf);
+        tick(performance.now());
+      }
     };
     document.addEventListener("visibilitychange", onVisibility);
 

@@ -37,6 +37,7 @@ describe("POST /api/submit", () => {
     const payload = JSON.parse(String(init.body));
     expect(payload.title).toBe("[CLAIM] Budi — 12345678");
     expect(payload.body).toContain("+628123456789");
+    expect(payload.labels).toEqual(["claim"]);
   });
 
   it("400 untuk payload tidak valid", async () => {

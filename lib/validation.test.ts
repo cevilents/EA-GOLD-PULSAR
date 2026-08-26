@@ -15,6 +15,11 @@ describe("validateClaim", () => {
     expect(r.ok && r.value.whatsapp).toBe("+628123456789");
   });
 
+  it("mengganti karakter kontrol pada nama dengan spasi", () => {
+    const r = validateClaim({ name: "Budi\nSantoso", whatsapp: "+628123456789", account: "12345678" });
+    expect(r.ok && r.value.name).toBe("Budi Santoso");
+  });
+
   it("tolak jika bukan objek", () => {
     expect(validateClaim(null).ok).toBe(false);
     expect(validateClaim("x").ok).toBe(false);

@@ -1,5 +1,7 @@
 export const WALLET_PARTNER = "1149206011366637938";
 
+export const WHATSAPP_SUPPORT = "https://wa.me/62xxxxxxxxxx";
+
 export interface EaItem {
   id: string;
   name: string;

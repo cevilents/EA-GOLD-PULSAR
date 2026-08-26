@@ -44,7 +44,9 @@ export function validateClaim(raw: unknown): ClaimValidationResult {
   }
 
   const errors: FieldErrors = {};
-  const name = readString(record, "name").trim();
+  const name = readString(record, "name")
+    .replace(/[\r\n\t]+/g, " ")
+    .trim();
   const whatsappRaw = readString(record, "whatsapp").trim();
   const account = readString(record, "account").trim();
 
