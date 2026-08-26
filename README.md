@@ -39,6 +39,10 @@ Buka `/admin` untuk mengelola klaim secara manual: tab **Klaim** menampilkan sem
 2. Tab pendaftar hanya berfungsi bila `EXNESS_LOGIN` dan `EXNESS_PASSWORD` sudah diisi.
 3. Menyetujui/menolak klaim akan mengubah status di repo GitHub Issues dan menambahkan catatan `manual_approve`/`manual_reject` pada riwayat pengecekan.
 
+### Verifikasi Otomatis
+
+Klaim pending diverifikasi ulang otomatis tiap 30 menit oleh Vercel Cron yang memanggil `/api/cron/verify` dengan header `Authorization: Bearer $CRON_SECRET`. Set `CRON_SECRET=string-acak` di environment variables Vercel. Verifikasi pertama juga terjadi langsung saat submit.
+
 ## Mengubah Daftar EA
 
 Edit satu file: `data/eas.ts`. Nama `file` harus sama persis dengan nama file yang kamu unggah.
