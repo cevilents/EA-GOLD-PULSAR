@@ -65,6 +65,23 @@ export interface Dictionary {
     copied: string;
     steps: TutorialStep[];
   };
+  checker: {
+    title: string;
+    subtitle: string;
+    accountLabel: string;
+    checkButton: string;
+    checking: string;
+    resultNotFoundTitle: string;
+    resultNotFoundBody: string;
+    resultBelowTitle: string;
+    resultBelowBody: string;
+    yourDeposit: string;
+    yourBalance: string;
+    requirementSeparator: string;
+    activeTitle: string;
+    activeBody: string;
+    checkAnother: string;
+  };
   form: {
     eyebrow: string;
     title: string;
@@ -213,12 +230,33 @@ export const dictionaries: Record<Locale, Dictionary> = {
         {
           title: "Submit Nomor Akun di Form Bawah",
           body:
-            "Setelah submit, sistem mengecek otomatis secara berkala. Begitu datamu cocok, akses terbuka sendiri — tidak perlu submit ulang.",
+            "Masukkan nomor akun real BARU-mu di form bawah untuk mengecek statusnya. Selama belum aktif, sistem menunjukkan apa yang masih kurang — begitu akunmu aktif di afiliasi kami, klaim lisensi langsung terbuka.",
           bullets: [],
           warning: null,
           wallet: false
         }
       ]
+    },
+    checker: {
+      title: "Cek Akun Dulu",
+      subtitle:
+        "Masukkan nomor akun real BARU-mu untuk mengecek apakah sudah terbaca dan memenuhi syarat di afiliasi kami sebelum klaim.",
+      accountLabel: "Nomor Akun Real",
+      checkButton: "Cek Akun",
+      checking: "Memeriksa…",
+      resultNotFoundTitle: "Akun Belum Terbaca di Afiliasi Kami",
+      resultNotFoundBody:
+        "Kemungkinan perpindahan IB kamu belum di-ACC Exness, atau akun dibuat sebelum persetujuan. Pastikan akun dibuat SETELAH perpindahan disetujui — lihat kembali langkah 1–3 di atas.",
+      resultBelowTitle: "Akun Terbaca, Tapi Belum Memenuhi Syarat",
+      resultBelowBody:
+        "Ada dua kemungkinan: (a) kamu belum membuat akun real BARU atau belum deposit ke akun tersebut, atau (b) saldo/deposit masih di bawah syarat minimum.",
+      yourDeposit: "Deposit kamu {amount} / syarat {required}",
+      yourBalance: "Saldo {amount} / syarat {required}",
+      requirementSeparator: " · ",
+      activeTitle: "Akun aktif!",
+      activeBody:
+        "Akunmu sudah terverifikasi under afiliasi GoldPulsarEA. Silakan klaim lisensimu di bawah.",
+      checkAnother: "Cek akun lain"
     },
     form: {
       eyebrow: "Langkah Terakhir",
@@ -401,12 +439,33 @@ export const dictionaries: Record<Locale, Dictionary> = {
         {
           title: "Submit Your Account Number in the Form Below",
           body:
-            "After you submit, the system verifies automatically on a schedule. As soon as your data matches, access unlocks by itself — no need to resubmit.",
+            "Enter your NEW real account number in the form below to check its status. While it isn't active yet, the system shows what's still missing — as soon as your account reads active under our affiliate, the license claim unlocks.",
           bullets: [],
           warning: null,
           wallet: false
         }
       ]
+    },
+    checker: {
+      title: "Check Your Account First",
+      subtitle:
+        "Enter your NEW real account number to verify it already shows and qualifies under our affiliate before claiming.",
+      accountLabel: "Real Account Number",
+      checkButton: "Check Account",
+      checking: "Checking…",
+      resultNotFoundTitle: "Account Not Visible Under Our Affiliate Yet",
+      resultNotFoundBody:
+        "Your IB transfer likely hasn't been approved by Exness yet, or the account was created before approval. Make sure the account is created AFTER the transfer is approved — revisit steps 1–3 above.",
+      resultBelowTitle: "Account Found, But Requirements Not Met Yet",
+      resultBelowBody:
+        "Two possibilities: (a) you haven't opened a NEW real account or deposited into it yet, or (b) your deposit/balance is still below the minimum requirement.",
+      yourDeposit: "Your deposit {amount} / required {required}",
+      yourBalance: "Balance {amount} / required {required}",
+      requirementSeparator: " · ",
+      activeTitle: "Account active!",
+      activeBody:
+        "Your account is verified under the GoldPulsarEA affiliate. Claim your license below.",
+      checkAnother: "Check another account"
     },
     form: {
       eyebrow: "Final Step",
