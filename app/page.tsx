@@ -1,7 +1,25 @@
+import ClaimFlow from "@/components/ClaimFlow";
+import EaCollection from "@/components/EaCollection";
+import Faq from "@/components/Faq";
+import Footer from "@/components/Footer";
+import Hero from "@/components/Hero";
+import Navbar from "@/components/Navbar";
+import StatsBar from "@/components/StatsBar";
+import TutorialSteps from "@/components/TutorialSteps";
+
 export default function Home() {
   return (
-    <main className="flex min-h-screen items-center justify-center">
-      <h1 className="font-display text-4xl font-bold text-gold">GoldPulsarEA</h1>
-    </main>
+    <>
+      <Navbar />
+      <main>
+        <Hero />
+        <StatsBar />
+        <EaCollection />
+        <TutorialSteps />
+        <ClaimFlow />
+        <Faq />
+      </main>
+      <Footer />
+    </>
   );
 }
