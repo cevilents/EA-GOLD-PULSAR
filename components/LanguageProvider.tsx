@@ -48,7 +48,8 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <I18nContext.Provider value={{ locale, setLocale }}>
-      {locale === null ? <LanguageGate /> : children}
+      {children}
+      {locale === null ? <LanguageGate /> : null}
     </I18nContext.Provider>
   );
 }
@@ -59,8 +60,6 @@ export function useI18nContext(): I18nContextValue {
 
 export function useI18n(): { locale: Locale; t: Dictionary } {
   const { locale } = useContext(I18nContext);
-  if (locale === null) {
-    throw new Error("useI18n must be used within LanguageProvider with an active locale");
-  }
-  return { locale, t: getDictionary(locale) };
+  const resolved: Locale = locale ?? "id";
+  return { locale: resolved, t: getDictionary(resolved) };
 }

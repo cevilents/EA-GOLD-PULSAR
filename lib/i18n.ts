@@ -311,7 +311,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
     stats: {
       items: [
         { value: "6", label: "Premium EAs" },
-        { value: "2.400+", label: "Active Traders" },
+        { value: "2,400+", label: "Active Traders" },
         { value: "XAUUSD", label: "Gold Specialist" },
         { value: "24/7", label: "Support" }
       ]
