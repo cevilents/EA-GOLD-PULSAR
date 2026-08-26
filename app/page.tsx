@@ -3,13 +3,14 @@ import EaCollection from "@/components/EaCollection";
 import Faq from "@/components/Faq";
 import Footer from "@/components/Footer";
 import Hero from "@/components/Hero";
+import { LanguageProvider } from "@/components/LanguageProvider";
 import Navbar from "@/components/Navbar";
 import StatsBar from "@/components/StatsBar";
 import TutorialSteps from "@/components/TutorialSteps";
 
 export default function Home() {
   return (
-    <>
+    <LanguageProvider>
       <Navbar />
       <main>
         <Hero />
@@ -20,6 +21,6 @@ export default function Home() {
         <Faq />
       </main>
       <Footer />
-    </>
+    </LanguageProvider>
   );
 }

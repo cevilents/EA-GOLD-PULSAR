@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { useI18n } from "./LanguageProvider";
 
 const LINKS = [
-  { href: "#koleksi", label: "Koleksi EA" },
-  { href: "#cara-klaim", label: "Cara Klaim" },
-  { href: "#faq", label: "FAQ" }
-];
+  { href: "#koleksi", key: "koleksi" },
+  { href: "#cara-klaim", key: "caraKlaim" },
+  { href: "#faq", key: "faq" }
+] as const;
 
 function LogoMark() {
   return (
@@ -25,6 +26,7 @@ function LogoMark() {
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
+  const { t } = useI18n();
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-white/5 bg-ink/80 backdrop-blur-xl">
@@ -39,21 +41,21 @@ export default function Navbar() {
         <div className="hidden items-center gap-8 md:flex">
           {LINKS.map((link) => (
             <a key={link.href} href={link.href} className="text-sm text-zinc-400 transition-colors hover:text-gold-light">
-              {link.label}
+              {t.nav.links[link.key]}
             </a>
           ))}
           <a
             href="#klaim"
             className="rounded-full bg-gradient-to-r from-gold-light to-gold-deep px-5 py-2 text-sm font-semibold text-ink shadow-[0_0_24px_rgba(212,175,55,0.35)] transition-transform hover:scale-105"
           >
-            Klaim Lisensi
+            {t.nav.cta}
           </a>
         </div>
 
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
-          aria-label="Buka menu"
+          aria-label={t.nav.menuAria}
           aria-expanded={open}
           className="flex h-10 w-10 items-center justify-center rounded-lg text-zinc-300 md:hidden"
         >
@@ -72,7 +74,7 @@ export default function Navbar() {
               onClick={() => setOpen(false)}
               className="block rounded-lg px-3 py-2.5 text-sm text-zinc-300 hover:bg-white/5 hover:text-gold-light"
             >
-              {link.label}
+              {t.nav.links[link.key]}
             </a>
           ))}
           <a
@@ -80,7 +82,7 @@ export default function Navbar() {
             onClick={() => setOpen(false)}
             className="mt-2 block rounded-full bg-gradient-to-r from-gold-light to-gold-deep px-5 py-2.5 text-center text-sm font-semibold text-ink"
           >
-            Klaim Lisensi
+            {t.nav.cta}
           </a>
         </div>
       )}

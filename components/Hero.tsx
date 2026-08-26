@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import CandleChart from "./CandleChart";
+import { useI18n } from "./LanguageProvider";
 
 function useLivePrice(): { price: number; delta: number } {
   const [tick, setTick] = useState({ price: 2384.25, delta: 12.4 });
@@ -22,6 +23,7 @@ function useLivePrice(): { price: number; delta: number } {
 
 export default function Hero() {
   const { price, delta } = useLivePrice();
+  const { t } = useI18n();
   const up = delta >= 0;
 
   return (
@@ -38,21 +40,19 @@ export default function Hero() {
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-gold-light opacity-60" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-gold-light" />
             </span>
-            100% Gratis — Syarat: Affiliasi Exness
+            {t.hero.badge}
           </div>
 
           <h1 className="font-display text-4xl font-bold leading-tight tracking-tight text-white sm:text-6xl">
-            EA XAUUSD Premium.
+            {t.hero.headline1}
             <br />
             <span className="bg-gradient-to-r from-gold-light via-gold to-gold-deep bg-clip-text text-transparent">
-              Gratis Selamanya.
+              {t.hero.headline2}
             </span>
           </h1>
 
           <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-zinc-400 sm:text-lg">
-            Koleksi Expert Advisor gold performa tinggi untuk akun Exness kamu.
-            Satu syarat: pindah afiliasi ke IB GoldPulsarEA, submit nomor akunmu,
-            dan seluruh koleksi menjadi milikmu.
+            {t.hero.description}
           </p>
 
           <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
@@ -60,13 +60,13 @@ export default function Hero() {
               href="#koleksi"
               className="w-full rounded-full border border-gold/40 bg-gold/10 px-8 py-3.5 text-sm font-semibold text-gold-light transition-colors hover:bg-gold/20 sm:w-auto"
             >
-              Lihat Koleksi EA
+              {t.hero.ctaPrimary}
             </a>
             <a
               href="#klaim"
               className="w-full rounded-full bg-gradient-to-r from-gold-light to-gold-deep px-8 py-3.5 text-sm font-bold text-ink shadow-[0_0_40px_rgba(212,175,55,0.35)] transition-transform hover:scale-105 sm:w-auto"
             >
-              Klaim Sekarang
+              {t.hero.ctaSecondary}
             </a>
           </div>
 

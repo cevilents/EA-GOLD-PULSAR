@@ -1,52 +1,27 @@
 "use client";
 
 import { useState } from "react";
+import { useI18n } from "./LanguageProvider";
 import Reveal from "./Reveal";
-
-const ITEMS = [
-  {
-    q: "Apakah semua EA-nya benar-benar gratis?",
-    a: "Ya, seluruh koleksi EA gratis selamanya. Satu-satunya 'pembayaran' adalah kamu bergabung sebagai klien IB di bawah afiliasi GoldPulsarEA melalui Exness — tanpa biaya apa pun darimu."
-  },
-  {
-    q: "Kenapa saya harus pindah afiliasi/partner?",
-    a: "GoldPulsarEA didukung oleh program IB Exness. Dengan kamu bergabung under afiliasi kami, broker memberi komisi kepada kami sehingga EA premium bisa dibagikan gratis ke kamu."
-  },
-  {
-    q: "Akun lama saya bisa dipakai?",
-    a: "Tidak. Akun yang dibuat sebelum perpindahan partner disetujui tetap tercatat milik partner lama selamanya. Kamu wajib membuat akun real BARU setelah perpindahan disetujui."
-  },
-  {
-    q: "Berapa deposit minimum?",
-    a: "Minimal $100 langsung ke akun real baru yang kamu buat setelah perpindahan disetujui. Transfer antar akun tidak dihitung."
-  },
-  {
-    q: "Berapa lama proses klaim saya diproses?",
-    a: "Setelah kamu submit nomor akun, sistem mengecek secara berkala. Jika datamu sudah cocok dengan afiliasi kami, akses unduhan terbuka. Biasanya maksimal beberapa jam setelah Exness menyetujui perpindahanmu."
-  },
-  {
-    q: "Apakah EA cocok untuk pemula?",
-    a: "Ya. Setiap EA dilengkapi panduan setting dan rekomendasi pair serta timeframe. Untuk awal, kami merekomendasikan Pulsar Scalper XAU dengan risk rendah di akun cent atau micro."
-  }
-];
 
 export default function Faq() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const { t } = useI18n();
 
   return (
     <section id="faq" className="scroll-mt-20 border-t border-white/5 bg-white/[0.02] py-24">
       <div className="mx-auto max-w-3xl px-4 sm:px-6">
         <Reveal>
           <div className="text-center">
-            <p className="text-sm font-semibold uppercase tracking-widest text-gold">FAQ</p>
+            <p className="text-sm font-semibold uppercase tracking-widest text-gold">{t.faq.eyebrow}</p>
             <h2 className="mt-3 font-display text-3xl font-bold text-white sm:text-4xl">
-              Pertanyaan Umum
+              {t.faq.title}
             </h2>
           </div>
         </Reveal>
 
         <div className="mt-12 space-y-3">
-          {ITEMS.map((item, i) => {
+          {t.faq.items.map((item, i) => {
             const open = openIndex === i;
             return (
               <Reveal key={item.q} delay={i * 40}>

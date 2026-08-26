@@ -2,10 +2,13 @@
 
 import { useCallback, useState } from "react";
 import { WALLET_PARTNER } from "@/data/eas";
+import type { TutorialStep } from "@/lib/i18n";
+import { useI18n } from "./LanguageProvider";
 import Reveal from "./Reveal";
 
 function CopyButton(): React.ReactElement {
   const [copied, setCopied] = useState(false);
+  const { t } = useI18n();
 
   const copy = useCallback(async () => {
     try {
@@ -37,7 +40,7 @@ function CopyButton(): React.ReactElement {
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M20 6L9 17l-5-5" />
           </svg>
-          Tersalin!
+          {t.tutorial.copied}
         </>
       ) : (
         <>
@@ -45,7 +48,7 @@ function CopyButton(): React.ReactElement {
             <rect x="9" y="9" width="13" height="13" rx="2" />
             <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
           </svg>
-          Salin Nomor
+          {t.tutorial.copy}
         </>
       )}
     </button>
@@ -64,62 +67,26 @@ function Warning({ children }: { children: React.ReactNode }) {
   );
 }
 
-interface Step {
-  title: string;
-  content: React.ReactNode;
-}
+function StepContent({ step }: { step: TutorialStep }) {
+  const { t } = useI18n();
 
-const STEPS: Step[] = [
-  {
-    title: "Pindah Affiliasi + Isi Wallet Partner",
-    content: (
-      <>
-        <p className="leading-relaxed">
-          Buka Live Chat Exness → kirim pesan <strong className="text-white">&ldquo;Partner Change&rdquo;</strong> →
-          klik link form dari Exness Assistant. Di kolom{" "}
-          <em className="text-zinc-300">&ldquo;New partner&rsquo;s link or wallet account number&rdquo;</em>, tempel nomor di bawah.
-        </p>
+  return (
+    <>
+      <p className="leading-relaxed">{step.body}</p>
+
+      {step.wallet && (
         <div className="mt-4 flex flex-col gap-3 rounded-xl border border-gold/30 bg-gold/[0.07] p-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-xs uppercase tracking-widest text-gold-light/80">Wallet Partner GoldPulsarEA</p>
+            <p className="text-xs uppercase tracking-widest text-gold-light/80">{t.tutorial.walletLabel}</p>
             <p className="mt-1 select-all font-mono text-lg font-bold tracking-wider text-white">{WALLET_PARTNER}</p>
           </div>
           <CopyButton />
         </div>
-        <Warning>
-          Jangan diketik manual — satu digit salah, permintaan ditolak. Gunakan tombol salin.
-        </Warning>
-      </>
-    )
-  },
-  {
-    title: "Tunggu Disetujui Exness",
-    content: (
-      <>
-        <p className="leading-relaxed">
-          Lengkapi sisa form → Submit → tunggu persetujuan Exness. Bisa makan waktu beberapa jam.
-        </p>
-        <Warning>
-          Jangan buat akun apa pun sebelum ini disetujui — akun yang dibuat lebih dulu tetap terhitung milik partner lama.
-        </Warning>
-      </>
-    )
-  },
-  {
-    title: "WAJIB: Buat Akun Real BARU Setelah Disetujui",
-    content: (
-      <>
-        <p className="leading-relaxed">
-          Begitu Exness mengonfirmasi perpindahan partner berhasil, buat akun real <strong className="text-white">BARU</strong>.
-          Akun real yang kamu punya sebelumnya tetap tercatat di partner lama dan tidak akan pernah terhitung ke
-          GoldPulsarEA, berapa pun depositnya. Perpindahan partner hanya berlaku untuk akun yang dibuat sesudah disetujui.
-        </p>
+      )}
+
+      {step.bullets.length > 0 && (
         <ul className="mt-4 space-y-2">
-          {[
-            "Pastikan Exness sudah mengonfirmasi perpindahan partner",
-            "Masuk ke Personal Area Exness → buat akun real baru",
-            "Catat nomor akun barunya — itu yang dipakai di langkah berikutnya"
-          ].map((item) => (
+          {step.bullets.map((item) => (
             <li key={item} className="flex items-start gap-2.5 text-sm text-zinc-300">
               <svg className="mt-1 shrink-0 text-gold" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M20 6L9 17l-5-5" />
@@ -128,50 +95,34 @@ const STEPS: Step[] = [
             </li>
           ))}
         </ul>
-        <Warning>Akun DEMO tidak dihitung. Harus akun real, dan harus dibuat setelah perpindahan disetujui.</Warning>
-      </>
-    )
-  },
-  {
-    title: "Deposit Minimal $100 ke Akun BARU",
-    content: (
-      <>
-        <p className="leading-relaxed">
-          Deposit langsung ke akun real yang baru kamu buat — bukan akun lama. Transfer saldo antar akun tidak dihitung.
-        </p>
-        <Warning>Deposit ke akun lama tidak akan membuat klaimmu valid.</Warning>
-      </>
-    )
-  },
-  {
-    title: "Submit Nomor Akun di Form Bawah",
-    content: (
-      <p className="leading-relaxed">
-        Setelah submit, sistem mengecek otomatis secara berkala. Begitu datamu cocok,
-        akses terbuka sendiri — tidak perlu submit ulang.
-      </p>
-    )
-  }
-];
+      )}
+
+      {step.warning !== null && <Warning>{step.warning}</Warning>}
+    </>
+  );
+}
 
 export default function TutorialSteps() {
+  const { t } = useI18n();
+  const steps = t.tutorial.steps;
+
   return (
     <section id="cara-klaim" className="scroll-mt-20 border-y border-white/5 bg-white/[0.02] py-24">
       <div className="mx-auto max-w-3xl px-4 sm:px-6">
         <Reveal>
           <div className="text-center">
-            <p className="text-sm font-semibold uppercase tracking-widest text-gold">Cara Klaim</p>
+            <p className="text-sm font-semibold uppercase tracking-widest text-gold">{t.tutorial.eyebrow}</p>
             <h2 className="mt-3 font-display text-3xl font-bold text-white sm:text-4xl">
-              Aktivasi VIP via Exness
+              {t.tutorial.title}
             </h2>
             <p className="mt-4 text-zinc-400">
-              Ikuti 5 langkah ini dengan urutan. Jangan loncat — setiap langkah punya syarat.
+              {t.tutorial.subtitle}
             </p>
           </div>
         </Reveal>
 
         <ol className="mt-14 space-y-6">
-          {STEPS.map((step, i) => (
+          {steps.map((step, i) => (
             <li key={step.title}>
               <Reveal delay={i * 60}>
                 <div className="relative flex gap-5">
@@ -179,11 +130,13 @@ export default function TutorialSteps() {
                     <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-gold/40 bg-gold/10 font-display text-lg font-bold text-gold-light">
                       {i + 1}
                     </div>
-                    {i < STEPS.length - 1 && <div className="mt-2 w-px flex-1 bg-gradient-to-b from-gold/40 to-transparent" />}
+                    {i < steps.length - 1 && <div className="mt-2 w-px flex-1 bg-gradient-to-b from-gold/40 to-transparent" />}
                   </div>
                   <div className="pb-2">
                     <h3 className="pt-2 font-display text-lg font-bold text-white">{step.title}</h3>
-                    <div className="mt-2 text-sm text-zinc-400">{step.content}</div>
+                    <div className="mt-2 text-sm text-zinc-400">
+                      <StepContent step={step} />
+                    </div>
                   </div>
                 </div>
               </Reveal>
