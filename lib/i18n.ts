@@ -71,15 +71,21 @@ export interface Dictionary {
     subtitle: string;
     nameLabel: string;
     namePlaceholder: string;
-    whatsappLabel: string;
-    whatsappPlaceholder: string;
+    emailLabel: string;
+    emailPlaceholder: string;
+    telegramLabel: string;
     accountLabel: string;
     accountPlaceholder: string;
     accountHelper: string;
     submit: string;
     submitting: string;
-    successTitle: string;
-    successBody: string;
+    approvedTitle: string;
+    approvedBody: string;
+    pendingTitle: string;
+    pendingBody: string;
+    checkAgain: string;
+    checking: string;
+    notFound: string;
     fallbackError: string;
     networkError: string;
     errors: {
@@ -219,17 +225,25 @@ export const dictionaries: Record<Locale, Dictionary> = {
         "Sudah pindah afiliasi dan deposit di akun baru? Submit nomor akun real-mu sekarang.",
       nameLabel: "Nama Lengkap",
       namePlaceholder: "Nama sesuai akun Exness",
-      whatsappLabel: "Nomor WhatsApp",
-      whatsappPlaceholder: "08xxxxxxxxxx",
+      emailLabel: "Email",
+      emailPlaceholder: "nama@email.com",
+      telegramLabel: "Username Telegram (opsional)",
       accountLabel: "Nomor Akun Real BARU",
       accountPlaceholder: "Contoh: 12345678",
       accountHelper:
         "Akun demo tidak dihitung. Harus akun real yang dibuat setelah perpindahan partner disetujui.",
       submit: "Submit & Buka Unduhan",
       submitting: "Mengirim…",
-      successTitle: "Klaim terkirim!",
-      successBody:
-        "Datamu sudah kami terima dan sedang diproses. Unduhan sudah terbuka di bawah.",
+      approvedTitle: "Klaim terverifikasi!",
+      approvedBody:
+        "Datamu sudah cocok dengan catatan afiliasi kami. Unduhan semua EA sudah terbuka di bawah.",
+      pendingTitle: "Menunggu Verifikasi",
+      pendingBody:
+        "Datamu sudah kami terima dan sistem mengecek berkala ke Exness — proses bisa memakan waktu beberapa jam setelah deposit masuk. Tidak perlu submit ulang.",
+      checkAgain: "Cek Status Lagi",
+      checking: "Memeriksa…",
+      notFound:
+        "Klaim belum ditemukan. Pastikan kamu sudah submit form dengan nomor akun yang benar.",
       fallbackError: "Terjadi kesalahan. Coba lagi.",
       networkError: "Tidak dapat terhubung ke server. Periksa koneksi internetmu.",
       errors: {
@@ -243,7 +257,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
       lockedTitle: "Download Terkunci",
       lockedBody:
         "Selesaikan langkah 1–4 di atas, lalu submit nomor akun real-mu di form untuk membuka semua file EA.",
-      unlockedTitle: "Klaim Diterima — Akses Dibuka!",
+      unlockedTitle: "Klaim Terverifikasi — Akses Dibuka!",
       unlockedBody:
         "Unduh semua EA di bawah. Password setting ada di grup WhatsApp kamu.",
       cta: "Unduh"
@@ -396,17 +410,25 @@ export const dictionaries: Record<Locale, Dictionary> = {
         "Already switched affiliates and deposited into your new account? Submit your real account number now.",
       nameLabel: "Full Name",
       namePlaceholder: "Name matching your Exness account",
-      whatsappLabel: "WhatsApp Number",
-      whatsappPlaceholder: "08xxxxxxxxxx",
+      emailLabel: "Email",
+      emailPlaceholder: "name@email.com",
+      telegramLabel: "Telegram Username (optional)",
       accountLabel: "NEW Real Account Number",
       accountPlaceholder: "e.g. 12345678",
       accountHelper:
         "Demo accounts don't count. Must be a real account created after the partner change is approved.",
       submit: "Submit & Unlock Downloads",
       submitting: "Sending…",
-      successTitle: "Claim sent!",
-      successBody:
-        "We've received your data and it's being processed. Downloads are already unlocked below.",
+      approvedTitle: "Claim verified!",
+      approvedBody:
+        "Your data matches our affiliate records. Downloads for every EA are unlocked below.",
+      pendingTitle: "Waiting for Verification",
+      pendingBody:
+        "We've received your data and the system checks Exness periodically — this can take a few hours after your deposit lands. No need to resubmit.",
+      checkAgain: "Check Status Again",
+      checking: "Checking…",
+      notFound:
+        "No claim found yet. Make sure you've submitted the form with the correct account number.",
       fallbackError: "Something went wrong. Please try again.",
       networkError: "Cannot reach the server. Please check your internet connection.",
       errors: {
@@ -420,7 +442,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
       lockedTitle: "Downloads Locked",
       lockedBody:
         "Complete steps 1–4 above, then submit your real account number in the form to unlock every EA file.",
-      unlockedTitle: "Claim Received — Access Unlocked!",
+      unlockedTitle: "Claim Verified — Access Unlocked!",
       unlockedBody:
         "Download all EAs below. Your set-file password is waiting in your WhatsApp group.",
       cta: "Download"

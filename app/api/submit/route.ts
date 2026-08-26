@@ -19,7 +19,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     return jsonError(503, "Layanan klaim belum dikonfigurasi.");
   }
 
-  if (!checkRateLimit(clientIp(request))) {
+  if (!checkRateLimit(`submit:${clientIp(request)}`)) {
     return jsonError(429, "Terlalu banyak percobaan. Coba lagi nanti.");
   }
 

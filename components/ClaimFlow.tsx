@@ -7,7 +7,7 @@ import { validateClaim, type FieldErrors } from "@/lib/validation";
 import { useI18n } from "./LanguageProvider";
 import Reveal from "./Reveal";
 
-type Status = "idle" | "loading" | "success";
+type Status = "idle" | "loading" | "approved" | "pending";
 
 const EMPTY_ERRORS: FieldErrors = {};
 
@@ -94,10 +94,21 @@ function DownloadPanel({ unlocked }: { unlocked: boolean }) {
   );
 }
 
+function readStatus(json: unknown): string {
+  if (typeof json === "object" && json !== null && "status" in json) {
+    return String((json as { status: unknown }).status);
+  }
+  return "";
+}
+
 export default function ClaimFlow() {
   const [status, setStatus] = useState<Status>("idle");
   const [errors, setErrors] = useState<FieldErrors>(EMPTY_ERRORS);
   const [serverError, setServerError] = useState("");
+  const [checkError, setCheckError] = useState("");
+  const [notFound, setNotFound] = useState(false);
+  const [checking, setChecking] = useState(false);
+  const [account, setAccount] = useState("");
   const { t } = useI18n();
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
@@ -107,7 +118,8 @@ export default function ClaimFlow() {
     const data = new FormData(form);
     const payload = {
       name: String(data.get("name") ?? ""),
-      whatsapp: String(data.get("whatsapp") ?? ""),
+      email: String(data.get("email") ?? ""),
+      telegram: String(data.get("telegram") ?? ""),
       account: String(data.get("account") ?? ""),
       website: String(data.get("website") ?? "")
     };
@@ -123,6 +135,7 @@ export default function ClaimFlow() {
       return;
     }
     setErrors(EMPTY_ERRORS);
+    setAccount(validation.value.account);
     setStatus("loading");
 
     try {
@@ -134,8 +147,12 @@ export default function ClaimFlow() {
       const json: unknown = await response.json().catch(() => null);
 
       if (response.ok) {
-        setStatus("success");
         form.reset();
+        if (readStatus(json) === "approved") {
+          setStatus("approved");
+        } else {
+          setStatus("pending");
+        }
         setTimeout(() => {
           document.getElementById("unduhan")?.scrollIntoView({ behavior: "smooth" });
         }, 100);
@@ -159,6 +176,37 @@ export default function ClaimFlow() {
     }
   }
 
+  async function handleCheckStatus(): Promise<void> {
+    setCheckError("");
+    setNotFound(false);
+    setChecking(true);
+
+    try {
+      const response = await fetch(`/api/claim/status?account=${encodeURIComponent(account)}`);
+      const json: unknown = await response.json().catch(() => null);
+      const remoteStatus = readStatus(json);
+
+      if (response.ok && remoteStatus === "approved") {
+        setStatus("approved");
+        setTimeout(() => {
+          document.getElementById("unduhan")?.scrollIntoView({ behavior: "smooth" });
+        }, 100);
+      } else if (response.ok && remoteStatus === "none") {
+        setNotFound(true);
+      } else if (!response.ok) {
+        const message =
+          typeof json === "object" && json !== null && "error" in json
+            ? String((json as { error: unknown }).error)
+            : t.form.fallbackError;
+        setCheckError(message);
+      }
+    } catch {
+      setCheckError(t.form.networkError);
+    } finally {
+      setChecking(false);
+    }
+  }
+
   return (
     <section id="klaim" className="scroll-mt-20 py-24">
       <div className="mx-auto max-w-3xl px-4 sm:px-6">
@@ -173,12 +221,33 @@ export default function ClaimFlow() {
         </Reveal>
 
         <Reveal delay={120}>
-          {status === "success" ? (
+          {status === "approved" ? (
             <div className="mt-12 rounded-2xl border border-emerald-500/30 bg-emerald-500/[0.06] p-6 text-center">
-              <p className="font-display text-lg font-bold text-emerald-400">{t.form.successTitle}</p>
+              <p className="font-display text-lg font-bold text-emerald-400">{t.form.approvedTitle}</p>
               <p className="mt-1 text-sm text-zinc-400">
-                {t.form.successBody}
+                {t.form.approvedBody}
               </p>
+            </div>
+          ) : status === "pending" ? (
+            <div className="mt-12 rounded-2xl border border-amber-500/30 bg-amber-500/[0.06] p-6 text-center">
+              <p className="font-display text-lg font-bold text-amber-400">{t.form.pendingTitle}</p>
+              <p className="mx-auto mt-1 max-w-md text-sm leading-relaxed text-zinc-400">
+                {t.form.pendingBody}
+              </p>
+              {notFound && <p className="mt-2 text-xs text-zinc-500">{t.form.notFound}</p>}
+              {checkError && (
+                <p role="alert" className="mt-4 rounded-xl border border-red-500/25 bg-red-500/[0.07] px-4 py-3 text-sm text-red-300">
+                  {checkError}
+                </p>
+              )}
+              <button
+                type="button"
+                onClick={() => void handleCheckStatus()}
+                disabled={checking}
+                className="mt-5 rounded-full border border-gold/40 px-6 py-2.5 text-sm font-bold text-gold-light transition enabled:hover:bg-gold/10 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {checking ? t.form.checking : t.form.checkAgain}
+              </button>
             </div>
           ) : (
             <form onSubmit={(e) => void handleSubmit(e)} className="mt-12 rounded-2xl border border-white/10 bg-white/[0.03] p-6 sm:p-8" noValidate>
@@ -186,17 +255,20 @@ export default function ClaimFlow() {
                 <Field label={t.form.nameLabel} error={errors.name}>
                   <input name="name" type="text" autoComplete="name" placeholder={t.form.namePlaceholder} className={inputClass} maxLength={60} required />
                 </Field>
-                <Field label={t.form.whatsappLabel} error={errors.email}>
-                  <input name="whatsapp" type="tel" autoComplete="tel" inputMode="tel" placeholder={t.form.whatsappPlaceholder} className={inputClass} required />
+                <Field label={t.form.emailLabel} error={errors.email}>
+                  <input name="email" type="email" autoComplete="email" placeholder={t.form.emailPlaceholder} className={inputClass} maxLength={120} required />
                 </Field>
-              </div>
-              <div className="mt-5">
-                <Field label={t.form.accountLabel} error={errors.account}>
-                  <input name="account" type="text" inputMode="numeric" pattern="[0-9]*" placeholder={t.form.accountPlaceholder} className={inputClass} maxLength={12} required />
+                <Field label={t.form.telegramLabel} error={errors.telegram}>
+                  <input name="telegram" type="text" autoComplete="off" placeholder="@username" className={inputClass} maxLength={32} />
                 </Field>
-                <p className="mt-2 text-xs text-zinc-600">
-                  {t.form.accountHelper}
-                </p>
+                <div>
+                  <Field label={t.form.accountLabel} error={errors.account}>
+                    <input name="account" type="text" inputMode="numeric" pattern="[0-9]*" autoComplete="off" placeholder={t.form.accountPlaceholder} className={inputClass} maxLength={12} required />
+                  </Field>
+                  <p className="mt-2 text-xs text-zinc-600">
+                    {t.form.accountHelper}
+                  </p>
+                </div>
               </div>
 
               <input type="text" name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />
@@ -218,7 +290,7 @@ export default function ClaimFlow() {
           )}
         </Reveal>
 
-        <DownloadPanel unlocked={status === "success"} />
+        <DownloadPanel unlocked={status === "approved"} />
       </div>
     </section>
   );

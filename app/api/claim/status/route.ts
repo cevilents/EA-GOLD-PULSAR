@@ -15,7 +15,7 @@ export async function GET(request: Request): Promise<NextResponse> {
     return NextResponse.json({ error: "Layanan klaim belum dikonfigurasi." }, { status: 503 });
   }
 
-  if (!checkRateLimit(clientIp(request))) {
+  if (!checkRateLimit(`status:${clientIp(request)}`)) {
     return NextResponse.json({ error: "Terlalu banyak percobaan. Coba lagi nanti." }, { status: 429 });
   }
 
