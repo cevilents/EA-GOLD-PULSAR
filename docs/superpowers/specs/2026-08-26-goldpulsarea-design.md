@@ -81,3 +81,47 @@ Bahasa antarmuka: Indonesia.
 
 - Integrasi API Exness: cek afiliasi nomor akun, status checker realtime, aktivasi lisensi otomatis.
 - Auth/admin dashboard.
+
+---
+
+## Addendum Fase 2 — Verifikasi Exness + Admin Panel (2026-08-26)
+
+### API Exness Partnership (base https://my.exnessaffiliates.com)
+
+- Auth: `POST /api/v2/auth/` body `{login, password}` → `{token}`; header `Authorization: JWT <token>`; kredensial hanya via env `EXNESS_LOGIN`/`EXNESS_PASSWORD`; token dicache in-memory, re-login saat 401.
+- Cek afiliasi akun: `GET /api/reports/clients/accounts/?client_account={mt5}&limit=10` → array kosong berarti bukan di bawah kita; row memberi `client_uid`, `client_account_type` (deteksi Cent), `volume_mln_usd`.
+- Statistik client: `GET /api/v2/reports/clients/?client_uid={uid}&limit=1` → `deposit_amount`, `client_balance`, `ftd_received`, `client_status`. Angka diasumsikan unit akun (lihat Cent di bawah).
+- Daftar pendaftar: endpoint v2 clients tanpa filter `client_uid` (paginate limit/offset).
+
+### Aturan verifikasi
+
+- APPROVED bila: akun ada di report kita DAN (`deposit_amount >= 100` ATAU `client_balance >= 50`) — konstanta `MIN_DEPOSIT_USD=100`, `MIN_BALANCE_USD=50`.
+- Akun Cent (type mengandung "cent"): threshold dikali `CENT_FACTOR=100` (unit cent). Faktor & threshold dikonsentrasikan di `lib/exness.ts` agar mudah diubah.
+- Nilai mentah selalu tampil di admin; admin dapat override approve/reject manual.
+
+### Storage klaim (menggantikan skema issue lama)
+
+- Tetap GitHub Issues repo privat (env sama). Body issue = blok JSON tunggal: `{version, name, email, telegram, account, createdAt, updatedAt, status: "pending"|"approved"|"rejected", checks: [...], note}`; title `[CLAIM] {name} — {account}`.
+- Status diubah via PATCH issue body (tanpa label — hindari 422 label tidak ada).
+
+### Endpoint baru
+
+- `POST /api/submit` (rework): validasi field baru → simpan issue `pending` → verifikasi langsung → respons `{ok, status}`.
+- `GET /api/claim/status?account=` → status klaim terakhir untuk nomor itu (untuk buka unduhan saat kembali).
+- `POST /api/admin/login` — `ADMIN_PASSWORD` env → cookie HttpOnly bertanda-tangan HMAC (`ADMIN_SESSION_SECRET`); rate limit reuse limiter.
+- `GET /api/admin/claims` — daftar klaim; `PATCH /api/admin/claims` — `{account, action: approve|reject, note?}`.
+- `GET /api/admin/clients` — proxy daftar pendaftar dari Exness (limit 100).
+- `GET /api/cron/verify` — dipanggil Vercel Cron tiap 30 menit (vercel.json): verifikasi ulang semua `pending`.
+
+### Form baru
+
+Nama Lengkap, Email, Username Telegram (opsional), Akun real MT5. Validasi: nama 2–60; email RFC-praktis ≤120; telegram opsional `^@?[a-zA-Z0-9_]{4,32}$`; akun MT5 digit 5–12.
+
+### UI
+
+- ClaimFlow: field baru, status `approved` membuka unduhan; `pending` menampilkan pesan cek berkala + tombol "Cek Status Lagi" (panggil `/api/claim/status`).
+- `/admin` (halaman statis client, Indonesia saja): login → dua tab (Klaim: tabel status + approve/reject; Pendaftar: tabel clients Exness). Tanpa i18n.
+
+### Env tambahan
+
+`EXNESS_LOGIN`, `EXNESS_PASSWORD`, `ADMIN_PASSWORD`, `ADMIN_SESSION_SECRET`.
