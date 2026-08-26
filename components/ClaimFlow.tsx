@@ -116,7 +116,8 @@ export default function ClaimFlow() {
     if (!validation.ok) {
       const localized: FieldErrors = {};
       if (validation.errors.name !== undefined) localized.name = t.form.errors.name;
-      if (validation.errors.whatsapp !== undefined) localized.whatsapp = t.form.errors.whatsapp;
+      if (validation.errors.email !== undefined) localized.email = t.form.errors.email;
+      if (validation.errors.telegram !== undefined) localized.telegram = t.form.errors.telegram;
       if (validation.errors.account !== undefined) localized.account = t.form.errors.account;
       setErrors(localized);
       return;
@@ -185,7 +186,7 @@ export default function ClaimFlow() {
                 <Field label={t.form.nameLabel} error={errors.name}>
                   <input name="name" type="text" autoComplete="name" placeholder={t.form.namePlaceholder} className={inputClass} maxLength={60} required />
                 </Field>
-                <Field label={t.form.whatsappLabel} error={errors.whatsapp}>
+                <Field label={t.form.whatsappLabel} error={errors.email}>
                   <input name="whatsapp" type="tel" autoComplete="tel" inputMode="tel" placeholder={t.form.whatsappPlaceholder} className={inputClass} required />
                 </Field>
               </div>

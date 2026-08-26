@@ -84,7 +84,8 @@ export interface Dictionary {
     networkError: string;
     errors: {
       name: string;
-      whatsapp: string;
+      email: string;
+      telegram: string;
       account: string;
     };
   };
@@ -233,7 +234,8 @@ export const dictionaries: Record<Locale, Dictionary> = {
       networkError: "Tidak dapat terhubung ke server. Periksa koneksi internetmu.",
       errors: {
         name: "Nama harus 2–60 karakter.",
-        whatsapp: "Nomor WhatsApp tidak valid (9–16 digit).",
+        email: "Email tidak valid.",
+        telegram: "Username Telegram tidak valid.",
         account: "Nomor akun harus 5–12 angka tanpa karakter lain."
       }
     },
@@ -409,7 +411,8 @@ export const dictionaries: Record<Locale, Dictionary> = {
       networkError: "Cannot reach the server. Please check your internet connection.",
       errors: {
         name: "Name must be 2–60 characters.",
-        whatsapp: "Invalid WhatsApp number (9–16 digits).",
+        email: "Invalid email address.",
+        telegram: "Invalid Telegram username.",
         account: "Account number must be 5–12 digits with no other characters."
       }
     },

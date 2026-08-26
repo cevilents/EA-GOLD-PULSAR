@@ -1,6 +1,7 @@
 export interface ClaimFields {
   name: string;
-  whatsapp: string;
+  email: string;
+  telegram: string;
   account: string;
 }
 
@@ -12,6 +13,11 @@ export type ClaimValidationResult =
 
 const NAME_MIN = 2;
 const NAME_MAX = 60;
+const EMAIL_MAX = 120;
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const TELEGRAM_PATTERN = /^[a-zA-Z0-9_]{4,32}$/;
+const ACCOUNT_PATTERN = /^\d{5,12}$/;
 
 function asRecord(raw: unknown): Record<string, unknown> | null {
   if (typeof raw !== "object" || raw === null || Array.isArray(raw)) return null;
@@ -21,16 +27,6 @@ function asRecord(raw: unknown): Record<string, unknown> | null {
 function readString(record: Record<string, unknown>, key: string): string {
   const value = record[key];
   return typeof value === "string" ? value : "";
-}
-
-function normalizeWhatsapp(value: string): string {
-  const cleaned = value.replace(/[\s-]/g, "");
-  if (cleaned.startsWith("+")) return cleaned;
-  return `+${cleaned}`;
-}
-
-function countDigits(value: string): number {
-  return (value.match(/\d/g) ?? []).length;
 }
 
 export function validateClaim(raw: unknown): ClaimValidationResult {
@@ -47,19 +43,29 @@ export function validateClaim(raw: unknown): ClaimValidationResult {
   const name = readString(record, "name")
     .replace(/[\r\n\t]+/g, " ")
     .trim();
-  const whatsappRaw = readString(record, "whatsapp").trim();
+  const email = readString(record, "email")
+    .trim()
+    .toLowerCase();
+  const telegramRaw = readString(record, "telegram").trim();
   const account = readString(record, "account").trim();
 
   if (name.length < NAME_MIN || name.length > NAME_MAX) {
     errors.name = "Nama harus 2–60 karakter.";
   }
 
-  const whatsapp = normalizeWhatsapp(whatsappRaw);
-  if (!/^\+\d+$/.test(whatsapp) || countDigits(whatsapp) < 9 || countDigits(whatsapp) > 16) {
-    errors.whatsapp = "Nomor WhatsApp tidak valid (9–16 digit).";
+  if (email.length > EMAIL_MAX || !EMAIL_PATTERN.test(email)) {
+    errors.email = "Email tidak valid.";
   }
 
-  if (!/^\d{5,12}$/.test(account)) {
+  let telegram = "";
+  if (telegramRaw.length > 0) {
+    telegram = telegramRaw.startsWith("@") ? telegramRaw.slice(1) : telegramRaw;
+    if (!TELEGRAM_PATTERN.test(telegram)) {
+      errors.telegram = "Username Telegram tidak valid.";
+    }
+  }
+
+  if (!ACCOUNT_PATTERN.test(account)) {
     errors.account = "Nomor akun harus 5–12 angka tanpa karakter lain.";
   }
 
@@ -67,5 +73,5 @@ export function validateClaim(raw: unknown): ClaimValidationResult {
     return { ok: false, errors };
   }
 
-  return { ok: true, value: { name, whatsapp, account } };
+  return { ok: true, value: { name, email, telegram, account } };
 }

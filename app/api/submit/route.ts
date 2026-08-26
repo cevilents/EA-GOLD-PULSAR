@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { createOrUpdateClaim, updateClaimResult } from "@/lib/claims";
+import { evaluateRule, findClientAccount, getClientStats } from "@/lib/exness";
 import { checkRateLimit } from "@/lib/rateLimit";
 import { validateClaim } from "@/lib/validation";
 
@@ -33,40 +35,30 @@ export async function POST(request: Request): Promise<NextResponse> {
     return jsonError(400, "Periksa kembali isian formulir.", result.errors);
   }
 
-  const { name, whatsapp, account } = result.value;
-  const issueBody = [
-    `Nama: ${name}`,
-    `WhatsApp: ${whatsapp}`,
-    `Nomor Akun: ${account}`,
-    `Waktu (UTC): ${new Date().toISOString()}`,
-    `User-Agent: ${request.headers.get("user-agent") ?? "-"}`
-  ].join("\n");
-
   try {
-    const response = await fetch(`https://api.github.com/repos/${process.env.GITHUB_REPO}/issues`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
-        Accept: "application/vnd.github+json",
-        "X-GitHub-Api-Version": "2022-11-28",
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        title: `[CLAIM] ${name} — ${account}`,
-        body: issueBody,
-        labels: ["claim"]
-      }),
-      signal: AbortSignal.timeout(10_000)
-    });
-
-    if (!response.ok) {
-      console.error(`github issue failed with status ${response.status}`);
-      return jsonError(502, "Gagal menyimpan klaim. Silakan coba lagi.");
-    }
+    await createOrUpdateClaim(result.value);
   } catch {
-    console.error("github issue request threw");
+    console.error("github claim storage failed");
     return jsonError(502, "Gagal menyimpan klaim. Silakan coba lagi.");
   }
 
-  return NextResponse.json({ ok: true });
+  let finalStatus: "approved" | "pending" = "pending";
+  try {
+    const lookup = await findClientAccount(result.value.account);
+    if (lookup.underPartner && typeof lookup.clientUid === "string" && lookup.clientUid.length > 0) {
+      const stats = await getClientStats(lookup.clientUid);
+      const verdict = evaluateRule(lookup.accountType, stats);
+      if (verdict.approved) {
+        await updateClaimResult(result.value.account, {
+          approved: true,
+          reason: verdict.reason
+        });
+        finalStatus = "approved";
+      }
+    }
+  } catch {
+    console.error("exness verification deferred to cron");
+  }
+
+  return NextResponse.json({ ok: true, status: finalStatus });
 }

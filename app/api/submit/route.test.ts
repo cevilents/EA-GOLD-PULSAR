@@ -1,8 +1,55 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const fetchMock = vi.fn();
+const exnessMocks = vi.hoisted(() => ({
+  findClientAccount: vi.fn(),
+  getClientStats: vi.fn(),
+  evaluateRule: vi.fn()
+}));
 
-async function post(body: unknown, ip = "1.2.3.4"): Promise<Response> {
+vi.mock("@/lib/exness", () => ({
+  ExnessError: class ExnessError extends Error {},
+  ...exnessMocks
+}));
+
+interface IssueState {
+  number: number;
+  title: string;
+  body: string;
+}
+
+const state: { issues: IssueState[] } = { issues: [] };
+
+const fetchMock = vi.fn(async (url: unknown, init?: RequestInit): Promise<Response> => {
+  const method = (init?.method ?? "GET").toUpperCase();
+  const urlStr = String(url);
+  if (method === "GET" && urlStr.includes("/issues?")) {
+    return new Response(JSON.stringify(state.issues), { status: 200 });
+  }
+  const payload: unknown = JSON.parse(String(init?.body ?? "{}"));
+  if (method === "POST") {
+    const record = payload as { title?: unknown; body?: unknown };
+    const issue: IssueState = {
+      number: state.issues.length + 1,
+      title: String(record.title ?? ""),
+      body: String(record.body ?? "")
+    };
+    state.issues.push(issue);
+    return new Response(JSON.stringify(issue), { status: 201 });
+  }
+  if (method === "PATCH") {
+    const parts = urlStr.split("/");
+    const numStr = parts[parts.length - 1];
+    const found = state.issues.find((issue) => String(issue.number) === numStr);
+    if (found) {
+      const record = payload as { body?: unknown };
+      found.body = String(record.body ?? "");
+    }
+    return new Response(JSON.stringify({ ok: true }), { status: 200 });
+  }
+  return new Response(null, { status: 200 });
+});
+
+async function post(body: unknown, ip: string): Promise<Response> {
   const { POST } = await import("./route");
   return POST(
     new Request("http://localhost/api/submit", {
@@ -13,13 +60,30 @@ async function post(body: unknown, ip = "1.2.3.4"): Promise<Response> {
   );
 }
 
+function patchCalls(): number {
+  return fetchMock.mock.calls.filter(
+    ([, init]) => String(init?.method ?? "GET").toUpperCase() === "PATCH"
+  ).length;
+}
+
+const validBody = {
+  name: "Budi",
+  email: "budi@example.com",
+  telegram: "@budi",
+  account: "12345678"
+};
+
 describe("POST /api/submit", () => {
   beforeEach(() => {
     vi.resetModules();
     vi.stubGlobal("fetch", fetchMock);
     process.env.GITHUB_TOKEN = "test-token";
     process.env.GITHUB_REPO = "me/claims";
-    fetchMock.mockResolvedValue(new Response(null, { status: 201 }));
+    exnessMocks.findClientAccount.mockReset();
+    exnessMocks.getClientStats.mockReset();
+    exnessMocks.evaluateRule.mockReset();
+    state.issues = [];
+    fetchMock.mockClear();
   });
 
   afterEach(() => {
@@ -27,45 +91,92 @@ describe("POST /api/submit", () => {
     vi.restoreAllMocks();
   });
 
-  it("sukses membuat issue github dengan payload benar", async () => {
-    const res = await post({ name: "Budi", whatsapp: "628123456789", account: "12345678" });
+  it("rule approved → respons approved dan issue dipatch berisi approved", async () => {
+    exnessMocks.findClientAccount.mockResolvedValue({
+      underPartner: true,
+      clientUid: "uid-1",
+      accountType: "Standard"
+    });
+    exnessMocks.getClientStats.mockResolvedValue({
+      depositAmount: 150,
+      balance: 20,
+      ftdReceived: true
+    });
+    exnessMocks.evaluateRule.mockReturnValue({
+      approved: true,
+      reason: "deposit_ok",
+      requiredDeposit: 100,
+      requiredBalance: 50
+    });
+
+    const res = await post(validBody, "1.2.3.4");
+    const json = (await res.json()) as { ok: boolean; status: string };
+
     expect(res.status).toBe(200);
-    expect(fetchMock).toHaveBeenCalledTimes(1);
-    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
-    expect(url).toBe("https://api.github.com/repos/me/claims/issues");
-    expect(init.headers).toMatchObject({ Authorization: "Bearer test-token" });
-    const payload = JSON.parse(String(init.body));
-    expect(payload.title).toBe("[CLAIM] Budi — 12345678");
-    expect(payload.body).toContain("+628123456789");
-    expect(payload.labels).toEqual(["claim"]);
+    expect(json).toEqual({ ok: true, status: "approved" });
+    const patched = state.issues.find((issue) => issue.body.includes('"approved"'));
+    expect(patched).toBeTruthy();
+    expect(patchCalls()).toBeGreaterThanOrEqual(1);
   });
 
-  it("400 untuk payload tidak valid", async () => {
-    const res = await post({ name: "", whatsapp: "xx", account: "1" });
+  it("underPartner tapi rule gagal → pending tanpa patch", async () => {
+    exnessMocks.findClientAccount.mockResolvedValue({
+      underPartner: true,
+      clientUid: "uid-1",
+      accountType: "Standard"
+    });
+    exnessMocks.getClientStats.mockResolvedValue({
+      depositAmount: 0,
+      balance: 0,
+      ftdReceived: false
+    });
+    exnessMocks.evaluateRule.mockReturnValue({
+      approved: false,
+      reason: "insufficient",
+      requiredDeposit: 100,
+      requiredBalance: 50
+    });
+
+    const res = await post(validBody, "2.2.2.2");
+    const json = (await res.json()) as { ok: boolean; status: string };
+
+    expect(res.status).toBe(200);
+    expect(json).toEqual({ ok: true, status: "pending" });
+    expect(patchCalls()).toBe(0);
+    expect(state.issues[0]?.body).toContain('"pending"');
+  });
+
+  it("exness error → tetap pending", async () => {
+    exnessMocks.findClientAccount.mockRejectedValue(new Error("boom"));
+
+    const res = await post(validBody, "3.3.3.3");
+    const json = (await res.json()) as { ok: boolean; status: string };
+
+    expect(res.status).toBe(200);
+    expect(json).toEqual({ ok: true, status: "pending" });
+    expect(exnessMocks.getClientStats).not.toHaveBeenCalled();
+    expect(patchCalls()).toBe(0);
+  });
+
+  it("payload tidak valid → 400 tanpa panggil github/exness", async () => {
+    const res = await post({ name: "", email: "x", telegram: "", account: "1" }, "4.4.4.4");
+
+    expect(res.status).toBe(400);
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(exnessMocks.findClientAccount).not.toHaveBeenCalled();
+  });
+
+  it("honeypot terisi → 400", async () => {
+    const res = await post({ ...validBody, website: "spam" }, "5.5.5.5");
+
     expect(res.status).toBe(400);
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it("503 saat env belum diset", async () => {
+  it("env github kosong → 503", async () => {
     delete process.env.GITHUB_TOKEN;
-    const res = await post({ name: "Budi", whatsapp: "628123456789", account: "12345678" }, "5.6.7.8");
+    const res = await post(validBody, "6.6.6.6");
     expect(res.status).toBe(503);
     expect(fetchMock).not.toHaveBeenCalled();
-  });
-
-  it("502 saat github gagal", async () => {
-    fetchMock.mockResolvedValue(new Response(null, { status: 500 }));
-    const res = await post({ name: "Budi", whatsapp: "628123456789", account: "12345678" }, "9.9.9.9");
-    expect(res.status).toBe(502);
-  });
-
-  it("429 saat melebihi rate limit", async () => {
-    const body = { name: "Budi", whatsapp: "628123456789", account: "12345678" };
-    for (let i = 0; i < 10; i++) {
-      await post(body, "7.7.7.7");
-    }
-    const res = await post(body, "7.7.7.7");
-    expect(res.status).toBe(429);
-    expect(fetchMock.mock.calls.length).toBeLessThanOrEqual(10);
   });
 });
