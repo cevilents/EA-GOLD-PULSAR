@@ -83,6 +83,8 @@ export interface Dictionary {
     approvedBody: string;
     pendingTitle: string;
     pendingBody: string;
+    rejectedTitle: string;
+    rejectedBody: string;
     checkAgain: string;
     checking: string;
     notFound: string;
@@ -240,6 +242,9 @@ export const dictionaries: Record<Locale, Dictionary> = {
       pendingTitle: "Menunggu Verifikasi",
       pendingBody:
         "Datamu sudah kami terima dan sistem mengecek berkala ke Exness — proses bisa memakan waktu beberapa jam setelah deposit masuk. Tidak perlu submit ulang.",
+      rejectedTitle: "Klaim Ditolak",
+      rejectedBody:
+        "Klaim kamu ditolak admin. Hubungi admin via WhatsApp untuk info lebih lanjut.",
       checkAgain: "Cek Status Lagi",
       checking: "Memeriksa…",
       notFound:
@@ -425,6 +430,9 @@ export const dictionaries: Record<Locale, Dictionary> = {
       pendingTitle: "Waiting for Verification",
       pendingBody:
         "We've received your data and the system checks Exness periodically — this can take a few hours after your deposit lands. No need to resubmit.",
+      rejectedTitle: "Claim Rejected",
+      rejectedBody:
+        "Your claim was rejected by the admin. Contact the admin via WhatsApp for more information.",
       checkAgain: "Check Status Again",
       checking: "Checking…",
       notFound:

@@ -7,7 +7,7 @@ import { validateClaim, type FieldErrors } from "@/lib/validation";
 import { useI18n } from "./LanguageProvider";
 import Reveal from "./Reveal";
 
-type Status = "idle" | "loading" | "approved" | "pending";
+type Status = "idle" | "loading" | "approved" | "pending" | "rejected";
 
 const EMPTY_ERRORS: FieldErrors = {};
 
@@ -191,6 +191,8 @@ export default function ClaimFlow() {
         setTimeout(() => {
           document.getElementById("unduhan")?.scrollIntoView({ behavior: "smooth" });
         }, 100);
+      } else if (response.ok && remoteStatus === "rejected") {
+        setStatus("rejected");
       } else if (response.ok && remoteStatus === "none") {
         setNotFound(true);
       } else if (!response.ok) {
@@ -245,6 +247,26 @@ export default function ClaimFlow() {
                 onClick={() => void handleCheckStatus()}
                 disabled={checking}
                 className="mt-5 rounded-full border border-gold/40 px-6 py-2.5 text-sm font-bold text-gold-light transition enabled:hover:bg-gold/10 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {checking ? t.form.checking : t.form.checkAgain}
+              </button>
+            </div>
+          ) : status === "rejected" ? (
+            <div className="mt-12 rounded-2xl border border-red-500/30 bg-red-500/[0.06] p-6 text-center">
+              <p className="font-display text-lg font-bold text-red-400">{t.form.rejectedTitle}</p>
+              <p className="mx-auto mt-1 max-w-md text-sm leading-relaxed text-zinc-400">
+                {t.form.rejectedBody}
+              </p>
+              {checkError && (
+                <p role="alert" className="mt-4 rounded-xl border border-red-500/25 bg-red-500/[0.07] px-4 py-3 text-sm text-red-300">
+                  {checkError}
+                </p>
+              )}
+              <button
+                type="button"
+                onClick={() => void handleCheckStatus()}
+                disabled={checking}
+                className="mt-5 rounded-full border border-red-500/40 px-6 py-2.5 text-sm font-bold text-red-300 transition enabled:hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {checking ? t.form.checking : t.form.checkAgain}
               </button>

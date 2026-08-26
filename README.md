@@ -26,6 +26,19 @@ Form klaim menyimpan pengajuan sebagai Issue di repo GitHub privat lewat `/api/s
 
 Tanpa kedua variabel itu, form mengembalikan pesan "layanan belum dikonfigurasi".
 
+## Admin Panel
+
+Buka `/admin` untuk mengelola klaim secara manual: tab **Klaim** menampilkan semua pengajuan beserta statusnya dan tombol Setujui/Tolak; tab **Pendaftar** menarik daftar klien langsung dari API afiliasi Exness.
+
+1. Tambahkan env berikut (lokal di `.env.local`, produksi di Vercel):
+   ```
+   ADMIN_PASSWORD=password-admin-yang-kuat
+   ADMIN_SESSION_SECRET=string-acak-panjang-minimal-32-karakter
+   ```
+   `ADMIN_SESSION_SECRET` bertugas menandatangani cookie sesi admin (HMAC, berlaku 8 jam) — isi acak, jangan pernah dipakai ulang untuk keperluan lain.
+2. Tab pendaftar hanya berfungsi bila `EXNESS_LOGIN` dan `EXNESS_PASSWORD` sudah diisi.
+3. Menyetujui/menolak klaim akan mengubah status di repo GitHub Issues dan menambahkan catatan `manual_approve`/`manual_reject` pada riwayat pengecekan.
+
 ## Mengubah Daftar EA
 
 Edit satu file: `data/eas.ts`. Nama `file` harus sama persis dengan nama file yang kamu unggah.
