@@ -122,6 +122,24 @@ export interface Dictionary {
     unlockedBody: string;
     cta: string;
   };
+  performance: {
+    eyebrow: string;
+    title: string;
+    subtitle: string;
+  };
+  testimonials: {
+    eyebrow: string;
+    title: string;
+    subtitle: string;
+    profit: string;
+  };
+  profit: {
+    eyebrow: string;
+    title: string;
+    subtitle: string;
+    initialDeposit: string;
+    winLoss: string;
+  };
   faq: {
     eyebrow: string;
     title: string;
@@ -308,6 +326,24 @@ export const dictionaries: Record<Locale, Dictionary> = {
       unlockedBody:
         "Unduh semua EA di bawah. Password setting ada di grup Telegram kamu.",
       cta: "Unduh"
+    },
+    performance: {
+      eyebrow: "Performa EA",
+      title: "Hasil Nyata, Bkan Janji",
+      subtitle: "Setiap EA memiliki track record yang transparan dan bisa diverifikasi."
+    },
+    testimonials: {
+      eyebrow: "Testimoni",
+      title: "Apa Kata Mereka?",
+      subtitle: "Ribuan trader sudah merasakan profit dari koleksi EA kami.",
+      profit: "Profit"
+    },
+    profit: {
+      eyebrow: "Profit Showcase",
+      title: "Lihat Hasilnya Sendiri",
+      subtitle: "Data performa real dari akun live trader kami.",
+      initialDeposit: "Modal Awal",
+      winLoss: "Win/Loss"
     },
     faq: {
       eyebrow: "FAQ",
@@ -520,6 +556,24 @@ export const dictionaries: Record<Locale, Dictionary> = {
       unlockedBody:
         "Download all EAs below. Your set-file password is waiting in your Telegram group.",
       cta: "Download"
+    },
+    performance: {
+      eyebrow: "EA Performance",
+      title: "Real Results, Not Promises",
+      subtitle: "Every EA has a transparent track record that can be verified."
+    },
+    testimonials: {
+      eyebrow: "Testimonials",
+      title: "What They Say",
+      subtitle: "Thousands of traders have experienced profits from our EA collection.",
+      profit: "Profit"
+    },
+    profit: {
+      eyebrow: "Profit Showcase",
+      title: "See the Results Yourself",
+      subtitle: "Real performance data from our traders' live accounts.",
+      initialDeposit: "Initial Deposit",
+      winLoss: "Win/Loss"
     },
     faq: {
       eyebrow: "FAQ",

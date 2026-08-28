@@ -5,7 +5,10 @@ import Footer from "@/components/Footer";
 import Hero from "@/components/Hero";
 import { LanguageProvider } from "@/components/LanguageProvider";
 import Navbar from "@/components/Navbar";
+import PerformanceHighlights from "@/components/PerformanceHighlights";
+import ProfitShowcase from "@/components/ProfitShowcase";
 import StatsBar from "@/components/StatsBar";
+import Testimonials from "@/components/Testimonials";
 import TutorialSteps from "@/components/TutorialSteps";
 
 export default function Home() {
@@ -15,7 +18,10 @@ export default function Home() {
       <main>
         <Hero />
         <StatsBar />
+        <PerformanceHighlights />
         <EaCollection />
+        <Testimonials />
+        <ProfitShowcase />
         <TutorialSteps />
         <ClaimFlow />
         <Faq />
