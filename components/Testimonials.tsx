@@ -53,21 +53,32 @@ export default function Testimonials() {
                     <h3 className="font-display text-sm font-bold text-white">{testimonial.name}</h3>
                     <p className="text-xs text-zinc-500">{testimonial.flag} {testimonial.location}</p>
                   </div>
+                  <div className="ml-auto">
+                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                      testimonial.type === "pemula" 
+                        ? "bg-emerald-500/20 text-emerald-400" 
+                        : "bg-gold/20 text-gold-light"
+                    }`}>
+                      {testimonial.type === "pemula" ? "PEMULA" : "EXPERT"}
+                    </span>
+                  </div>
                 </div>
 
-                <div className="relative mt-4">
+                <div className="relative mt-4 flex items-center gap-3">
                   <div className="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 px-3 py-1">
                     <span className="text-xs text-emerald-400">{t.testimonials.profit}</span>
                     <span className="font-display text-sm font-bold text-emerald-400">{testimonial.profit}</span>
                   </div>
+                  <span className="text-xs text-zinc-500">{testimonial.duration}</span>
                 </div>
 
                 <p className="relative mt-4 flex-1 text-sm leading-relaxed text-zinc-400">
                   &ldquo;{getTestimonial(testimonial, locale)}&rdquo;
                 </p>
 
-                <div className="relative mt-4">
+                <div className="relative mt-4 flex items-center justify-between">
                   <StarRating rating={testimonial.rating} />
+                  <span className="text-[10px] text-zinc-600">Verified</span>
                 </div>
               </article>
             </Reveal>

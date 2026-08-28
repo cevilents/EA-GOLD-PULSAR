@@ -140,6 +140,11 @@ export interface Dictionary {
     initialDeposit: string;
     winLoss: string;
   };
+  why: {
+    eyebrow: string;
+    title: string;
+    subtitle: string;
+  };
   faq: {
     eyebrow: string;
     title: string;
@@ -180,10 +185,10 @@ export const dictionaries: Record<Locale, Dictionary> = {
     },
     stats: {
       items: [
-        { value: "6", label: "EA Premium" },
-        { value: "2.400+", label: "Trader Aktif" },
-        { value: "XAUUSD", label: "Spesialis Gold" },
-        { value: "24/7", label: "Dukungan" }
+        { value: "7", label: "EA Premium" },
+        { value: "10.000+", label: "Trader Aktif" },
+        { value: "$2.4M+", label: "Total Profit Trader" },
+        { value: "76%", label: "Win Rate Rata-rata" }
       ]
     },
     collection: {
@@ -345,6 +350,11 @@ export const dictionaries: Record<Locale, Dictionary> = {
       initialDeposit: "Modal Awal",
       winLoss: "Win/Loss"
     },
+    why: {
+      eyebrow: "Kenapa GoldPulsarEA",
+      title: "Keunggulan Kami",
+      subtitle: "Alasan kenapa 10,000+ trader memilih GoldPulsarEA."
+    },
     faq: {
       eyebrow: "FAQ",
       title: "Pertanyaan Umum",
@@ -409,10 +419,10 @@ export const dictionaries: Record<Locale, Dictionary> = {
     },
     stats: {
       items: [
-        { value: "6", label: "Premium EAs" },
-        { value: "2,400+", label: "Active Traders" },
-        { value: "XAUUSD", label: "Gold Specialist" },
-        { value: "24/7", label: "Support" }
+        { value: "7", label: "Premium EAs" },
+        { value: "10,000+", label: "Active Traders" },
+        { value: "$2.4M+", label: "Total Trader Profit" },
+        { value: "76%", label: "Average Win Rate" }
       ]
     },
     collection: {
@@ -574,6 +584,11 @@ export const dictionaries: Record<Locale, Dictionary> = {
       subtitle: "Real performance data from our traders' live accounts.",
       initialDeposit: "Initial Deposit",
       winLoss: "Win/Loss"
+    },
+    why: {
+      eyebrow: "Why GoldPulsarEA",
+      title: "Our Advantages",
+      subtitle: "Why 10,000+ traders choose GoldPulsarEA."
     },
     faq: {
       eyebrow: "FAQ",

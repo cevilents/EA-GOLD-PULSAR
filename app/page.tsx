@@ -10,6 +10,7 @@ import ProfitShowcase from "@/components/ProfitShowcase";
 import StatsBar from "@/components/StatsBar";
 import Testimonials from "@/components/Testimonials";
 import TutorialSteps from "@/components/TutorialSteps";
+import WhyGoldPulsar from "@/components/WhyGoldPulsar";
 
 export default function Home() {
   return (
@@ -22,6 +23,7 @@ export default function Home() {
         <EaCollection />
         <Testimonials />
         <ProfitShowcase />
+        <WhyGoldPulsar />
         <TutorialSteps />
         <ClaimFlow />
         <Faq />
