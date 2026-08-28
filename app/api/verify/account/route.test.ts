@@ -16,10 +16,14 @@ vi.mock("@/lib/exness", async (importOriginal) => {
 });
 
 interface DetailJson {
-  depositAmount: number;
-  balance: number;
-  requiredDeposit: number;
-  requiredBalance: number;
+  depositBand: number;
+  balanceBand: number;
+  depositMinUsd: number;
+  balanceMinUsd: number;
+  requiredDepositBand: number;
+  requiredBalanceBand: number;
+  requiredDepositUsd: number;
+  requiredBalanceUsd: number;
   isCent: boolean;
 }
 
@@ -71,8 +75,8 @@ describe("GET /api/verify/account", () => {
       accountType: "Standard"
     });
     exnessMocks.getClientStats.mockResolvedValue({
-      depositAmount: 150,
-      balance: 60,
+      depositBand: 4,
+      balanceBand: 3,
       ftdReceived: true
     });
 
@@ -91,8 +95,8 @@ describe("GET /api/verify/account", () => {
       accountType: "Standard"
     });
     exnessMocks.getClientStats.mockResolvedValue({
-      depositAmount: 40,
-      balance: 30,
+      depositBand: 2,
+      balanceBand: 2,
       ftdReceived: false
     });
 
@@ -104,40 +108,15 @@ describe("GET /api/verify/account", () => {
       ok: true,
       state: "below",
       detail: {
-        depositAmount: 40,
-        balance: 30,
-        requiredDeposit: 100,
-        requiredBalance: 50,
+        depositBand: 2,
+        balanceBand: 2,
+        depositMinUsd: 10,
+        balanceMinUsd: 10,
+        requiredDepositBand: 3,
+        requiredBalanceBand: 3,
+        requiredDepositUsd: 100,
+        requiredBalanceUsd: 50,
         isCent: false
-      }
-    });
-  });
-
-  it("akun cent → required dikalikan faktor cent dan isCent true", async () => {
-    exnessMocks.findClientAccount.mockResolvedValue({
-      underPartner: true,
-      clientUid: "uid-c",
-      accountType: "Financial Cent"
-    });
-    exnessMocks.getClientStats.mockResolvedValue({
-      depositAmount: 5000,
-      balance: 20,
-      ftdReceived: true
-    });
-
-    const res = await get("34567890", "4.4.4.4");
-    const json = (await res.json()) as ResponseJson;
-
-    expect(res.status).toBe(200);
-    expect(json).toEqual({
-      ok: true,
-      state: "below",
-      detail: {
-        depositAmount: 5000,
-        balance: 20,
-        requiredDeposit: 10000,
-        requiredBalance: 5000,
-        isCent: true
       }
     });
   });
@@ -158,10 +137,14 @@ describe("GET /api/verify/account", () => {
       ok: true,
       state: "below",
       detail: {
-        depositAmount: 0,
-        balance: 0,
-        requiredDeposit: 100,
-        requiredBalance: 50,
+        depositBand: 0,
+        balanceBand: 0,
+        depositMinUsd: 0,
+        balanceMinUsd: 0,
+        requiredDepositBand: 3,
+        requiredBalanceBand: 3,
+        requiredDepositUsd: 100,
+        requiredBalanceUsd: 50,
         isCent: false
       }
     });

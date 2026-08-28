@@ -18,6 +18,11 @@ function isCentType(accountType: string | null): boolean {
   return accountType !== null && accountType.toLowerCase().includes("cent");
 }
 
+function bandToMinUsd(band: number): number {
+  const map = [0, 0, 10, 50, 250, 1000, 5000];
+  return map[band] ?? 0;
+}
+
 export async function GET(request: Request): Promise<NextResponse> {
   if (!checkRateLimit(`check:${clientIp(request)}`)) {
     return NextResponse.json(
@@ -51,10 +56,14 @@ export async function GET(request: Request): Promise<NextResponse> {
       ok: true,
       state: "below",
       detail: {
-        depositAmount: stats?.depositAmount ?? 0,
-        balance: stats?.balance ?? 0,
-        requiredDeposit: evaluation.requiredDeposit,
-        requiredBalance: evaluation.requiredBalance,
+        depositBand: stats?.depositBand ?? 0,
+        balanceBand: stats?.balanceBand ?? 0,
+        depositMinUsd: bandToMinUsd(stats?.depositBand ?? 0),
+        balanceMinUsd: bandToMinUsd(stats?.balanceBand ?? 0),
+        requiredDepositBand: evaluation.requiredDepositBand,
+        requiredBalanceBand: evaluation.requiredBalanceBand,
+        requiredDepositUsd: evaluation.depositMinUsd,
+        requiredBalanceUsd: evaluation.balanceMinUsd,
         isCent: isCentType(lookup.accountType)
       }
     });

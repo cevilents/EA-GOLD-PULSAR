@@ -72,7 +72,7 @@ Edit satu file: `data/eas.ts`. Nama `file` harus sama persis dengan nama file ya
 
 ## Kontak Support
 
-Ganti nilai `WHATSAPP_SUPPORT` di `data/eas.ts` dengan link WhatsApp admin asli (format `https://wa.me/62xxxxxxxxxx`). Link ini dipakai footer sebagai kanal bantuan pengunjung.
+Ganti nilai `TELEGRAM_SUPPORT` di `data/eas.ts` dengan link channel Telegram admin asli (format `https://t.me/username`). Link ini dipakai footer sebagai kanal bantuan pengunjung.
 
 ## Menambahkan File EA
 

@@ -6,10 +6,10 @@ export interface ClaimCheck {
   at: string;
   approved: boolean;
   reason: string;
-  depositAmount?: number;
-  balance?: number;
-  requiredDeposit?: number;
-  requiredBalance?: number;
+  depositBand?: number;
+  balanceBand?: number;
+  requiredDepositBand?: number;
+  requiredBalanceBand?: number;
 }
 
 export interface ClaimRecord {
@@ -30,10 +30,10 @@ export interface ClaimRow {
 }
 
 export interface VerdictMetrics {
-  depositAmount?: number;
-  balance?: number;
-  requiredDeposit?: number;
-  requiredBalance?: number;
+  depositBand?: number;
+  balanceBand?: number;
+  requiredDepositBand?: number;
+  requiredBalanceBand?: number;
 }
 
 export interface ClaimResultInput {
@@ -77,7 +77,7 @@ function asChecks(value: unknown): ClaimCheck[] {
     const reason = record["reason"];
     if (typeof at !== "string" || typeof reason !== "string") continue;
     const check: ClaimCheck = { at, approved: record["approved"] === true, reason };
-    for (const key of ["depositAmount", "balance", "requiredDeposit", "requiredBalance"] as const) {
+    for (const key of ["depositBand", "balanceBand", "requiredDepositBand", "requiredBalanceBand"] as const) {
       const metric = record[key];
       if (typeof metric === "number" && Number.isFinite(metric)) {
         check[key] = metric;
@@ -198,17 +198,17 @@ export async function updateClaimResult(
   const previous = asChecks(existing.checks);
   const now = new Date().toISOString();
   const check: ClaimCheck = { at: now, approved: result.approved, reason: result.reason };
-  if (result.metrics?.depositAmount !== undefined) {
-    check.depositAmount = result.metrics.depositAmount;
+  if (result.metrics?.depositBand !== undefined) {
+    check.depositBand = result.metrics.depositBand;
   }
-  if (result.metrics?.balance !== undefined) {
-    check.balance = result.metrics.balance;
+  if (result.metrics?.balanceBand !== undefined) {
+    check.balanceBand = result.metrics.balanceBand;
   }
-  if (result.metrics?.requiredDeposit !== undefined) {
-    check.requiredDeposit = result.metrics.requiredDeposit;
+  if (result.metrics?.requiredDepositBand !== undefined) {
+    check.requiredDepositBand = result.metrics.requiredDepositBand;
   }
-  if (result.metrics?.requiredBalance !== undefined) {
-    check.requiredBalance = result.metrics.requiredBalance;
+  if (result.metrics?.requiredBalanceBand !== undefined) {
+    check.requiredBalanceBand = result.metrics.requiredBalanceBand;
   }
   const { error } = await client
     .from("claims")

@@ -11,10 +11,14 @@ type Status = "idle" | "loading" | "approved" | "pending" | "rejected";
 type Phase = "check" | "claim";
 
 interface CheckDetail {
-  depositAmount: number;
-  balance: number;
-  requiredDeposit: number;
-  requiredBalance: number;
+  depositBand: number;
+  balanceBand: number;
+  depositMinUsd: number;
+  balanceMinUsd: number;
+  requiredDepositBand: number;
+  requiredBalanceBand: number;
+  requiredDepositUsd: number;
+  requiredBalanceUsd: number;
   isCent: boolean;
 }
 
@@ -51,10 +55,14 @@ function parseCheckResponse(json: unknown): CheckResult | null {
     return {
       state: "below",
       detail: {
-        depositAmount: num(detail["depositAmount"]),
-        balance: num(detail["balance"]),
-        requiredDeposit: num(detail["requiredDeposit"]),
-        requiredBalance: num(detail["requiredBalance"]),
+        depositBand: num(detail["depositBand"]),
+        balanceBand: num(detail["balanceBand"]),
+        depositMinUsd: num(detail["depositMinUsd"]),
+        balanceMinUsd: num(detail["balanceMinUsd"]),
+        requiredDepositBand: num(detail["requiredDepositBand"]),
+        requiredBalanceBand: num(detail["requiredBalanceBand"]),
+        requiredDepositUsd: num(detail["requiredDepositUsd"]),
+        requiredBalanceUsd: num(detail["requiredBalanceUsd"]),
         isCent: detail["isCent"] === true
       }
     };
@@ -352,13 +360,13 @@ export default function ClaimFlow() {
           </p>
           <p className="mt-4 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-zinc-300">
             {fillTemplate(t.checker.yourDeposit, {
-              amount: String(detail.depositAmount),
-              required: String(detail.requiredDeposit)
+              amount: String(detail.depositMinUsd),
+              required: String(detail.requiredDepositUsd)
             })}
             {t.checker.requirementSeparator}
             {fillTemplate(t.checker.yourBalance, {
-              amount: String(detail.balance),
-              required: String(detail.requiredBalance)
+              amount: String(detail.balanceMinUsd),
+              required: String(detail.requiredBalanceUsd)
             })}
           </p>
           <button
@@ -377,6 +385,13 @@ export default function ClaimFlow() {
         <h3 className="font-display text-lg font-bold text-white">{t.checker.title}</h3>
         <p className="mt-1 max-w-md text-sm leading-relaxed text-zinc-400">
           {t.checker.subtitle}
+        </p>
+        <p className="mt-3 rounded-xl border border-gold/20 bg-gold/[0.05] px-4 py-3 text-sm text-gold-light">
+          <svg className="inline-block h-4 w-4 mr-2 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 8v4M12 16h.01" />
+          </svg>
+          {t.checker.centRecommendation}
         </p>
 
         <Field label={t.checker.accountLabel}>

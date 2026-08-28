@@ -81,6 +81,7 @@ export interface Dictionary {
     activeTitle: string;
     activeBody: string;
     checkAnother: string;
+    centRecommendation: string;
   };
   form: {
     eyebrow: string;
@@ -213,7 +214,8 @@ export const dictionaries: Record<Locale, Dictionary> = {
           bullets: [
             "Pastikan Exness sudah mengonfirmasi perpindahan partner",
             "Masuk ke Personal Area Exness → buat akun real baru",
-            "Catat nomor akun barunya — itu yang dipakai di langkah berikutnya"
+            "Catat nomor akun barunya — itu yang dipakai di langkah berikutnya",
+            "Rekomendasi: pilih tipe **Standard Cent** (micro) — nilai pip lebih kecil, risiko dollar per trade lebih rendah, cocok untuk EA scalper"
           ],
           warning:
             "Akun DEMO tidak dihitung. Harus akun real, dan harus dibuat setelah perpindahan disetujui.",
@@ -256,7 +258,9 @@ export const dictionaries: Record<Locale, Dictionary> = {
       activeTitle: "Akun aktif!",
       activeBody:
         "Akunmu sudah terverifikasi under afiliasi GoldPulsarEA. Silakan klaim lisensimu di bawah.",
-      checkAnother: "Cek akun lain"
+      checkAnother: "Cek akun lain",
+      centRecommendation:
+        "Rekomendasi: gunakan akun CENT (micro) untuk lebih aman — nilai pip lebih kecil, risiko dollar per trade lebih rendah, cocok untuk EA scalper."
     },
     form: {
       eyebrow: "Langkah Terakhir",
@@ -282,7 +286,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
         "Datamu sudah kami terima dan sistem mengecek berkala ke Exness — proses bisa memakan waktu beberapa jam setelah deposit masuk. Tidak perlu submit ulang.",
       rejectedTitle: "Klaim Ditolak",
       rejectedBody:
-        "Klaim kamu ditolak admin. Hubungi admin via WhatsApp untuk info lebih lanjut.",
+        "Klaim kamu ditolak admin. Hubungi admin via Telegram untuk info lebih lanjut.",
       checkAgain: "Cek Status Lagi",
       checking: "Memeriksa…",
       notFound:
@@ -302,7 +306,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
         "Selesaikan langkah 1–4 di atas, lalu submit nomor akun real-mu di form untuk membuka semua file EA.",
       unlockedTitle: "Klaim Terverifikasi — Akses Dibuka!",
       unlockedBody:
-        "Unduh semua EA di bawah. Password setting ada di grup WhatsApp kamu.",
+        "Unduh semua EA di bawah. Password setting ada di grup Telegram kamu.",
       cta: "Unduh"
     },
     faq: {
@@ -339,7 +343,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
       disclaimer:
         "Peringatan Risiko: Perdagangan forex dan CFD memiliki tingkat risiko tinggi dan dapat mengakibatkan hilangnya seluruh modal Anda. Kinerja masa lalu tidak menjamin hasil di masa depan. Gunakan hanya dana yang siap Anda rugikan. GoldPulsarEA tidak memberikan nasihat investasi.",
       needHelp: "Butuh bantuan?",
-      contactLink: "Hubungi admin via WhatsApp",
+      contactLink: "Hubungi admin via Telegram",
       rights: "© {year} GoldPulsarEA. Semua hak dilindungi."
     }
   },
@@ -422,7 +426,8 @@ export const dictionaries: Record<Locale, Dictionary> = {
           bullets: [
             "Make sure Exness has confirmed the partner change",
             "Log in to your Exness Personal Area → open a new real account",
-            "Write down the new account number — you'll need it in the next step"
+            "Write down the new account number — you'll need it in the next step",
+            "Recommendation: choose **Standard Cent** (micro) — smaller pip value, lower dollar risk per trade, ideal for EA scalpers"
           ],
           warning:
             "DEMO accounts don't count. It must be a real account, created after the transfer is approved.",
@@ -465,7 +470,9 @@ export const dictionaries: Record<Locale, Dictionary> = {
       activeTitle: "Account active!",
       activeBody:
         "Your account is verified under the GoldPulsarEA affiliate. Claim your license below.",
-      checkAnother: "Check another account"
+      checkAnother: "Check another account",
+      centRecommendation:
+        "Recommendation: use a CENT (micro) account for safety — smaller pip value, lower dollar risk per trade, ideal for EA scalpers."
     },
     form: {
       eyebrow: "Final Step",
@@ -491,7 +498,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
         "We've received your data and the system checks Exness periodically — this can take a few hours after your deposit lands. No need to resubmit.",
       rejectedTitle: "Claim Rejected",
       rejectedBody:
-        "Your claim was rejected by the admin. Contact the admin via WhatsApp for more information.",
+        "Your claim was rejected by the admin. Contact the admin via Telegram for more information.",
       checkAgain: "Check Status Again",
       checking: "Checking…",
       notFound:
@@ -511,7 +518,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
         "Complete steps 1–4 above, then submit your real account number in the form to unlock every EA file.",
       unlockedTitle: "Claim Verified — Access Unlocked!",
       unlockedBody:
-        "Download all EAs below. Your set-file password is waiting in your WhatsApp group.",
+        "Download all EAs below. Your set-file password is waiting in your Telegram group.",
       cta: "Download"
     },
     faq: {
@@ -548,7 +555,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
       disclaimer:
         "Risk Warning: Forex and CFD trading carry a high level of risk and can result in the loss of all your capital. Past performance does not guarantee future results. Only trade with funds you can afford to lose. GoldPulsarEA does not provide investment advice.",
       needHelp: "Need help?",
-      contactLink: "Contact admin via WhatsApp",
+      contactLink: "Contact admin via Telegram",
       rights: "© {year} GoldPulsarEA. All rights reserved."
     }
   }

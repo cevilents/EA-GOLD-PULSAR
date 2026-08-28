@@ -6,8 +6,10 @@ export interface AdminClientRow {
   uid: string;
   country: string;
   regDate: string;
-  depositAmount: number;
-  balance: number;
+  depositBand: number;
+  balanceBand: number;
+  depositMinUsd: number;
+  balanceMinUsd: number;
   ftdReceived: boolean;
   volumeMlnUsd: number;
   status: string;
@@ -35,13 +37,22 @@ function toNum(value: unknown): number {
   return Number.isFinite(num) ? num : 0;
 }
 
+function bandToMinUsd(band: number): number {
+  const map = [0, 0, 10, 50, 250, 1000, 5000];
+  return map[band] ?? 0;
+}
+
 function mapRow(row: Record<string, unknown>): AdminClientRow {
+  const depositBand = toNum(row["deposit_amount"]);
+  const balanceBand = toNum(row["client_balance"]);
   return {
     uid: toStr(row["client_uid"]),
     country: toStr(row["country"]),
     regDate: toStr(row["reg_date"]),
-    depositAmount: toNum(row["deposit_amount"]),
-    balance: toNum(row["client_balance"]),
+    depositBand,
+    balanceBand,
+    depositMinUsd: bandToMinUsd(depositBand),
+    balanceMinUsd: bandToMinUsd(balanceBand),
     ftdReceived: Boolean(row["ftd_received"]),
     volumeMlnUsd: toNum(row["volume_mln_usd"]),
     status: toStr(row["client_status"])

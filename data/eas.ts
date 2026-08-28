@@ -2,7 +2,7 @@ import type { Locale } from "@/lib/i18n";
 
 export const WALLET_PARTNER = "1149206011366637938";
 
-export const WHATSAPP_SUPPORT = "https://wa.me/62xxxxxxxxxx";
+export const TELEGRAM_SUPPORT = "https://t.me/EAGOLDPULSAR";
 
 export interface EaItem {
   id: string;
@@ -31,99 +31,115 @@ export function eaDescription(ea: EaItem, locale: Locale): string {
 
 export const EAS: EaItem[] = [
   {
-    id: "pulsar-scalper-xau",
-    name: "Pulsar Scalper XAU",
-    tagline: "Scalping kilat di jam London–NY",
+    id: "phoenix-cent",
+    name: "Phoenix Cent",
+    tagline: "EA untuk akun cent, risiko rendah",
     description:
-      "Menangkap momentum mikro gold dengan entry cepat di likuiditas tertinggi. Cocok untuk akun kecil, stop loss ketat, target konsisten.",
-    taglineEn: "Lightning scalping through London–NY hours",
+      "Dirancang khusus untuk akun cent dengan lot minimal. Cocok untuk pemula yang ingin belajar trading dengan risiko terkontrol.",
+    taglineEn: "EA for cent accounts, low risk",
     descriptionEn:
-      "Captures micro momentum in gold with fast entries at peak liquidity. Built for small accounts, tight stop losses, and consistent targets.",
-    tags: ["Scalping", "Momentum", "Low Spread"],
-    winRate: "87%",
-    profitFactor: "2.14",
-    maxDd: "6.2%",
-    timeframe: "M5",
-    file: "PulsarScalperXAU.ex5"
-  },
-  {
-    id: "golden-grid-master",
-    name: "Golden Grid Master",
-    tagline: "Grid adaptif anti-marjincall",
-    description:
-      "Grid dinamis dengan filter volatilitas ATR dan proteksi equity otomatis. Dirancang khusus untuk karakter pergerakan XAUUSD.",
-    taglineEn: "Adaptive grid with margin-call protection",
-    descriptionEn:
-      "A dynamic grid with ATR volatility filtering and automatic equity protection. Purpose-built for the way XAUUSD actually moves.",
-    tags: ["Grid", "Adaptif", "Equity Guard"],
-    winRate: "91%",
-    profitFactor: "1.98",
-    maxDd: "9.8%",
-    timeframe: "M15",
-    file: "GoldenGridMaster.ex5"
-  },
-  {
-    id: "aurora-breakout-xau",
-    name: "Aurora Breakout XAU",
-    tagline: "Breakout range sesi Eropa",
-    description:
-      "Membaca akumulasi range pre-London lalu meledak saat breakout sesungguhnya. Filter news bawaan menghindari spike berbahaya.",
-    taglineEn: "European session range breakouts",
-    descriptionEn:
-      "Reads pre-London range accumulation, then strikes when the real breakout fires. A built-in news filter steers clear of dangerous spikes.",
-    tags: ["Breakout", "Session", "News Filter"],
+      "Purpose-built for cent accounts with minimal lot sizing. Ideal for beginners learning to trade with controlled risk.",
+    tags: ["Cent"],
     winRate: "78%",
-    profitFactor: "2.65",
-    maxDd: "8.1%",
-    timeframe: "M30",
-    file: "AuroraBreakoutXAU.ex5"
+    profitFactor: "1.65",
+    maxDd: "8.5%",
+    timeframe: "All Timeframe",
+    file: "PhoenixCent.ex5"
   },
   {
-    id: "nova-recovery-pro",
-    name: "Nova Recovery Pro",
-    tagline: "Recovery pintar, bukan martingale bodoh",
+    id: "phoenix-alpha-v5",
+    name: "Phoenix Alpha V5",
+    tagline: " Strategi multi-pair berbasis momentum",
     description:
-      "Sistem recovery bertahap dengan batas lot maksimum dan cut-loss struktural. Mengembalikan posisi minus tanpa mempertaruhkan seluruh equity.",
-    taglineEn: "Smart recovery, not reckless martingale",
+      "Menganalisis momentum beberapa pair sekaligus dan memilih peluang terbaik. Entry presisi dengan manajemen risiko otomatis.",
+    taglineEn: "Multi-pair momentum strategy",
     descriptionEn:
-      "A staged recovery system with maximum lot caps and structural cut-loss. Recovers losing positions without gambling your entire equity.",
-    tags: ["Recovery", "Risk Managed"],
-    winRate: "83%",
-    profitFactor: "1.87",
-    maxDd: "11.4%",
-    timeframe: "M15",
-    file: "NovaRecoveryPro.ex5"
+      "Analyzes momentum across multiple pairs simultaneously and selects the best opportunities. Precise entries with automatic risk management.",
+    tags: ["Multi-Pair"],
+    winRate: "76%",
+    profitFactor: "1.92",
+    maxDd: "10.2%",
+    timeframe: "All Timeframe",
+    file: "PhoenixAlphaV5.ex5"
   },
   {
-    id: "quantum-trend-sniper",
-    name: "Quantum Trend Sniper",
-    tagline: "Sniper trend harian gold",
+    id: "phoenix-breakout",
+    name: "Phoenix Breakout",
+    tagline: "Penembusan level kunci otomatis",
     description:
-      "Multi-timeframe confluence mendeteksi arah trend H1–H4, entry presisi saat pullback selesai. Trailing profit otomatis mengunci gain.",
-    taglineEn: "Daily gold trend sniper",
+      "Mendeteksi support/resistance kunci dan masuk saat breakout terkonfirmasi. Dilengkapi filter false breakout untuk mengurangi sinyal palsu.",
+    taglineEn: "Automatic key level breakouts",
     descriptionEn:
-      "Multi-timeframe confluence detects the H1–H4 trend direction and enters precisely once pullbacks complete. Automatic trailing profit locks in gains.",
-    tags: ["Trend Following", "MTF", "Trailing"],
-    winRate: "74%",
-    profitFactor: "3.02",
-    maxDd: "7.5%",
-    timeframe: "H1",
-    file: "QuantumTrendSniper.ex5"
+      "Detects key support/resistance levels and enters on confirmed breakouts. Equipped with false breakout filters to reduce fake signals.",
+    tags: ["Breakout"],
+    winRate: "79%",
+    profitFactor: "2.18",
+    maxDd: "9.1%",
+    timeframe: "All Timeframe",
+    file: "PhoenixBreakout.ex5"
   },
   {
-    id: "helios-news-guard",
-    name: "Helios News Guard",
-    tagline: "Spesialis NFP & FOMC",
+    id: "phoenix-dca",
+    name: "Phoenix DCA",
+    tagline: "Dollar Cost Averaging terstruktur",
     description:
-      "Mode defensif saat kalender ekonomi merah, mode agresif pasca-news saat likuiditas kembali. Sahabat trader berita gold.",
-    taglineEn: "NFP & FOMC specialist",
+      "Membuka posisi bertahap dengan interval dan lot terukur. Tidak menggunakan martingale — setiap level memiliki batas risiko yang jelas.",
+    taglineEn: "Structured Dollar Cost Averaging",
     descriptionEn:
-      "Defensive mode on red calendar days, aggressive mode post-news once liquidity returns. The gold news trader's best friend.",
-    tags: ["News Trading", "Volatility"],
+      "Opens positions gradually with measured intervals and lot sizes. No martingale — each level has clear risk limits.",
+    tags: ["DCA"],
     winRate: "81%",
-    profitFactor: "2.31",
-    maxDd: "9.2%",
-    timeframe: "M5",
-    file: "HeliosNewsGuard.ex5"
+    profitFactor: "1.78",
+    maxDd: "12.3%",
+    timeframe: "All Timeframe",
+    file: "PhoenixDCA.ex5"
+  },
+  {
+    id: "phoenix-dashboard",
+    name: "Phoenix Dashboard",
+    tagline: "Panel monitoring semua EA Phoenix",
+    description:
+      "Menampilkan performa real-time semua EA Phoenix dalam satu panel. Monitoring equity, drawdown, dan profit dari satu tempat.",
+    taglineEn: "Monitor all Phoenix EAs in one panel",
+    descriptionEn:
+      "Displays real-time performance of all Phoenix EAs in a single panel. Monitor equity, drawdown, and profit from one place.",
+    tags: ["Dashboard"],
+    winRate: "—",
+    profitFactor: "—",
+    maxDd: "—",
+    timeframe: "All Timeframe",
+    file: "PhoenixDashboard.ex5"
+  },
+  {
+    id: "phoenix-demond",
+    name: "Phoenix Demond",
+    tagline: "EA agresif target besar",
+    description:
+      "Strategi agresif dengan target profit tinggi dan toleransi drawdown lebih besar. Cocok untuk akun yang siap menangani volatilitas.",
+    taglineEn: "Aggressive EA with big targets",
+    descriptionEn:
+      "Aggressive strategy with high profit targets and larger drawdown tolerance. Suited for accounts that can handle volatility.",
+    tags: ["Aggressive"],
+    winRate: "68%",
+    profitFactor: "2.45",
+    maxDd: "15.8%",
+    timeframe: "All Timeframe",
+    file: "PhoenixDemond.ex5"
+  },
+  {
+    id: "phoenix-idr",
+    name: "Phoenix IDR",
+    tagline: "EA khusus akun Rupiah",
+    description:
+      "Optimized untuk akun dengan mata uang IDR. Menyesuaikan spread dan komisi khas broker lokal Indonesia.",
+    taglineEn: "EA for Rupiah accounts only",
+    descriptionEn:
+      "Optimized for IDR-denominated accounts. Adjusts for the spreads and commissions typical of local Indonesian brokers.",
+    tags: ["IDR"],
+    winRate: "77%",
+    profitFactor: "1.85",
+    maxDd: "9.7%",
+    timeframe: "All Timeframe",
+    file: "PhoenixIDR.ex5"
   }
 ];

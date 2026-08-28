@@ -210,7 +210,7 @@ describe("updateClaimResult", () => {
     const updated = await updateClaimResult("12345678", {
       approved: true,
       reason: "deposit_ok",
-      metrics: { depositAmount: 150, balance: 30, requiredDeposit: 100, requiredBalance: 50 }
+      metrics: { depositBand: 4, balanceBand: 2, requiredDepositBand: 4, requiredBalanceBand: 3 }
     });
 
     expect(updated).toBe(true);
@@ -220,10 +220,10 @@ describe("updateClaimResult", () => {
       at: expect.any(String),
       approved: true,
       reason: "deposit_ok",
-      depositAmount: 150,
-      balance: 30,
-      requiredDeposit: 100,
-      requiredBalance: 50
+      depositBand: 4,
+      balanceBand: 2,
+      requiredDepositBand: 4,
+      requiredBalanceBand: 3
     });
     expect(harness.state.rows[0]["status"]).toBe("approved");
   });

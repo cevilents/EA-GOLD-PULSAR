@@ -26,7 +26,14 @@ function LogoMark() {
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+
+  function toggleLocale(): void {
+    const next: "id" | "en" = locale === "id" ? "en" : "id";
+    window.localStorage.setItem("gp-locale", next);
+    document.documentElement.lang = next;
+    window.location.reload();
+  }
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-white/5 bg-ink/80 backdrop-blur-xl">
@@ -38,12 +45,20 @@ export default function Navbar() {
           </span>
         </a>
 
-        <div className="hidden items-center gap-8 md:flex">
+        <div className="hidden items-center gap-6 md:flex">
           {LINKS.map((link) => (
             <a key={link.href} href={link.href} className="text-sm text-zinc-400 transition-colors hover:text-gold-light">
               {t.nav.links[link.key]}
             </a>
           ))}
+          <button
+            type="button"
+            onClick={toggleLocale}
+            aria-label={locale === "id" ? "Switch to English" : "Beralih ke Bahasa Indonesia"}
+            className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:border-gold/40 hover:text-gold-light"
+          >
+            {locale === "id" ? "EN" : "ID"}
+          </button>
           <a
             href="#klaim"
             className="rounded-full bg-gradient-to-r from-gold-light to-gold-deep px-5 py-2 text-sm font-semibold text-ink shadow-[0_0_24px_rgba(212,175,55,0.35)] transition-transform hover:scale-105"
@@ -77,6 +92,16 @@ export default function Navbar() {
               {t.nav.links[link.key]}
             </a>
           ))}
+          <div className="mt-3 flex items-center justify-between">
+            <span className="text-sm text-zinc-500">Bahasa</span>
+            <button
+              type="button"
+              onClick={toggleLocale}
+              className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:border-gold/40 hover:text-gold-light"
+            >
+              {locale === "id" ? "EN" : "ID"}
+            </button>
+          </div>
           <a
             href="#klaim"
             onClick={() => setOpen(false)}

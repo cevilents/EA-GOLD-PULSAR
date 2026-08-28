@@ -55,10 +55,10 @@ export async function POST(request: Request): Promise<NextResponse> {
           reason: verdict.reason,
           metrics: stats
             ? {
-                depositAmount: stats.depositAmount,
-                balance: stats.balance,
-                requiredDeposit: verdict.requiredDeposit,
-                requiredBalance: verdict.requiredBalance
+                depositBand: stats.depositBand,
+                balanceBand: stats.balanceBand,
+                requiredDepositBand: verdict.requiredDepositBand,
+                requiredBalanceBand: verdict.requiredBalanceBand
               }
             : undefined
         });

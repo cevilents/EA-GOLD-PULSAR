@@ -1,6 +1,6 @@
 "use client";
 
-import { WHATSAPP_SUPPORT } from "@/data/eas";
+import { TELEGRAM_SUPPORT } from "@/data/eas";
 import { useI18n } from "./LanguageProvider";
 
 export default function Footer() {
@@ -19,7 +19,7 @@ export default function Footer() {
           <p className="text-xs text-zinc-600">
             {t.footer.needHelp}{" "}
             <a
-              href={WHATSAPP_SUPPORT}
+              href={TELEGRAM_SUPPORT}
               target="_blank"
               rel="noopener noreferrer"
               className="text-gold-light hover:underline"
