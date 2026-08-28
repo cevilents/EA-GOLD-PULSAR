@@ -1,6 +1,7 @@
 "use client";
 
 import { PROFIT_CARDS, getProfitHighlight } from "@/data/testimonials";
+import PlaceholderImage from "./PlaceholderImage";
 import { useI18n } from "./LanguageProvider";
 import Reveal from "./Reveal";
 
@@ -58,6 +59,10 @@ export default function ProfitShowcase() {
                 <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-emerald-500/5 transition-all duration-500 group-hover:scale-150" />
                 
                 <div className="relative">
+                  <PlaceholderImage type="profit" className="h-32" label={card.returnPct} />
+                </div>
+
+                <div className="relative mt-4">
                   <div className="flex items-start justify-between">
                     <h3 className="font-display text-xl font-bold text-white">{card.eaName}</h3>
                     <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] font-bold text-emerald-400">
@@ -67,7 +72,7 @@ export default function ProfitShowcase() {
                   <p className="mt-1 text-sm text-emerald-400/80">{getProfitHighlight(card, locale)}</p>
                 </div>
 
-                <div className="relative mt-6 rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4">
+                <div className="relative mt-4 rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4">
                   <EquityCurve />
                   <div className="mt-3 flex items-baseline gap-2">
                     <span className="font-display text-4xl font-bold text-emerald-400">{card.returnPct}</span>
@@ -75,7 +80,7 @@ export default function ProfitShowcase() {
                   </div>
                 </div>
 
-                <dl className="relative mt-6 grid grid-cols-3 gap-4">
+                <dl className="relative mt-4 grid grid-cols-3 gap-4">
                   <div>
                     <dt className="text-[10px] uppercase tracking-wide text-zinc-500">{t.profit.initialDeposit}</dt>
                     <dd className="mt-0.5 font-display text-sm font-bold text-white">{card.initialDeposit}</dd>

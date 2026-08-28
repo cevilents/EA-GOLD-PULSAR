@@ -1,6 +1,7 @@
 "use client";
 
 import { EAS } from "@/data/eas";
+import PlaceholderImage from "./PlaceholderImage";
 import { useI18n } from "./LanguageProvider";
 import Reveal from "./Reveal";
 
@@ -64,7 +65,11 @@ export default function PerformanceHighlights() {
                 }`}>
                   <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-emerald-500/10 transition-all duration-500 group-hover:scale-150 group-hover:bg-emerald-500/20" />
                   
-                  <div className="relative flex items-start justify-between">
+                  <div className="relative">
+                    <PlaceholderImage type="ea" className="h-24" label={ea.name} />
+                  </div>
+                  
+                  <div className="relative mt-3 flex items-start justify-between">
                     <h3 className="font-display text-lg font-bold text-white">{ea.name}</h3>
                     {isPopular && (
                       <span className="rounded-full bg-gradient-to-r from-gold-light to-gold-deep px-2 py-0.5 text-[10px] font-bold text-ink">

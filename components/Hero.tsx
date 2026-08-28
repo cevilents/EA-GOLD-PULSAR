@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import CandleChart from "./CandleChart";
+import PlaceholderImage from "./PlaceholderImage";
 import { useI18n } from "./LanguageProvider";
 
 function useLivePrice(): { price: number; delta: number } {
@@ -70,66 +71,73 @@ export default function Hero() {
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-ink/40 via-ink/70 to-ink" />
 
       <div className="relative mx-auto max-w-6xl px-4 pb-24 pt-20 sm:px-6 sm:pt-28">
-        <div className="mx-auto max-w-4xl text-center">
-          <div className="mb-6 flex flex-col items-center gap-3">
-            <SocialProofBadge />
-            <div className="inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/10 px-4 py-1.5 text-xs font-medium text-gold-light">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-gold-light opacity-60" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-gold-light" />
+        <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
+          <div className="text-center lg:text-left">
+            <div className="mb-6 flex flex-col items-center gap-3 lg:items-start">
+              <SocialProofBadge />
+              <div className="inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/10 px-4 py-1.5 text-xs font-medium text-gold-light">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-gold-light opacity-60" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-gold-light" />
+                </span>
+                {t.hero.badge}
+              </div>
+            </div>
+
+            <h1 className="font-display text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
+              {t.hero.headline1}
+              <br />
+              <span className="bg-gradient-to-r from-gold-light via-gold to-gold-deep bg-clip-text text-transparent">
+                {t.hero.headline2}
               </span>
-              {t.hero.badge}
+            </h1>
+
+            <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-zinc-400 sm:text-lg lg:mx-0">
+              {t.hero.description}
+            </p>
+
+            <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row lg:justify-start">
+              <a
+                href="#koleksi"
+                className="w-full rounded-full border border-gold/40 bg-gold/10 px-8 py-3.5 text-sm font-semibold text-gold-light transition-colors hover:bg-gold/20 sm:w-auto"
+              >
+                {t.hero.ctaPrimary}
+              </a>
+              <a
+                href="#klaim"
+                className="w-full rounded-full bg-gradient-to-r from-gold-light to-gold-deep px-8 py-3.5 text-sm font-bold text-ink shadow-[0_0_40px_rgba(212,175,55,0.35)] transition-transform hover:scale-105 sm:w-auto"
+              >
+                {t.hero.ctaSecondary}
+              </a>
+            </div>
+
+            <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center lg:justify-start">
+              <div className="inline-flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-6 py-3 backdrop-blur-md">
+                <span className="text-xs uppercase tracking-widest text-zinc-500">XAUUSD</span>
+                <span className="font-display text-xl font-bold text-white">
+                  {price.toFixed(2)}
+                </span>
+                <span className={`flex items-center gap-1 text-sm font-semibold ${up ? "text-emerald-400" : "text-red-400"}`}>
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true" className={up ? "" : "rotate-180"}>
+                    <path d="M6 1l5 7H1z" />
+                  </svg>
+                  {up ? "+" : ""}
+                  {delta.toFixed(2)}
+                </span>
+              </div>
+
+              <div className="inline-flex items-center gap-3 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 px-6 py-3 backdrop-blur-md">
+                <span className="text-xs uppercase tracking-widest text-emerald-500">Total Profit Trader</span>
+                <span className="font-display text-xl font-bold text-emerald-400">
+                  ${(totalProfit / 1000000).toFixed(1)}M+
+                </span>
+              </div>
             </div>
           </div>
 
-          <h1 className="font-display text-4xl font-bold leading-tight tracking-tight text-white sm:text-6xl">
-            {t.hero.headline1}
-            <br />
-            <span className="bg-gradient-to-r from-gold-light via-gold to-gold-deep bg-clip-text text-transparent">
-              {t.hero.headline2}
-            </span>
-          </h1>
-
-          <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-zinc-400 sm:text-lg">
-            {t.hero.description}
-          </p>
-
-          <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <a
-              href="#koleksi"
-              className="w-full rounded-full border border-gold/40 bg-gold/10 px-8 py-3.5 text-sm font-semibold text-gold-light transition-colors hover:bg-gold/20 sm:w-auto"
-            >
-              {t.hero.ctaPrimary}
-            </a>
-            <a
-              href="#klaim"
-              className="w-full rounded-full bg-gradient-to-r from-gold-light to-gold-deep px-8 py-3.5 text-sm font-bold text-ink shadow-[0_0_40px_rgba(212,175,55,0.35)] transition-transform hover:scale-105 sm:w-auto"
-            >
-              {t.hero.ctaSecondary}
-            </a>
-          </div>
-
-          <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-            <div className="inline-flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-6 py-3 backdrop-blur-md">
-              <span className="text-xs uppercase tracking-widest text-zinc-500">XAUUSD</span>
-              <span className="font-display text-xl font-bold text-white">
-                {price.toFixed(2)}
-              </span>
-              <span className={`flex items-center gap-1 text-sm font-semibold ${up ? "text-emerald-400" : "text-red-400"}`}>
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true" className={up ? "" : "rotate-180"}>
-                  <path d="M6 1l5 7H1z" />
-                </svg>
-                {up ? "+" : ""}
-                {delta.toFixed(2)}
-              </span>
-            </div>
-
-            <div className="inline-flex items-center gap-3 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 px-6 py-3 backdrop-blur-md">
-              <span className="text-xs uppercase tracking-widest text-emerald-500">Total Profit Trader</span>
-              <span className="font-display text-xl font-bold text-emerald-400">
-                ${(totalProfit / 1000000).toFixed(1)}M+
-              </span>
-            </div>
+          <div className="relative hidden lg:block">
+            <div className="absolute -inset-4 rounded-3xl bg-gradient-to-r from-gold/20 to-emerald-500/20 blur-2xl" />
+            <PlaceholderImage type="chart" className="relative h-80" />
           </div>
         </div>
       </div>

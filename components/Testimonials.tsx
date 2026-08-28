@@ -1,6 +1,7 @@
 "use client";
 
 import { TESTIMONIALS, getTestimonial } from "@/data/testimonials";
+import PlaceholderImage from "./PlaceholderImage";
 import { useI18n } from "./LanguageProvider";
 import Reveal from "./Reveal";
 
@@ -46,14 +47,12 @@ export default function Testimonials() {
                 <div className="absolute -right-6 -top-6 h-20 w-20 rounded-full bg-gold/5 transition-all duration-500 group-hover:scale-150" />
                 
                 <div className="relative flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-gold-light to-gold-deep text-sm font-bold text-ink">
-                    {testimonial.name.charAt(0)}
-                  </div>
-                  <div>
+                  <PlaceholderImage type="trader" className="h-12 w-12 flex-shrink-0" />
+                  <div className="min-w-0 flex-1">
                     <h3 className="font-display text-sm font-bold text-white">{testimonial.name}</h3>
                     <p className="text-xs text-zinc-500">{testimonial.flag} {testimonial.location}</p>
                   </div>
-                  <div className="ml-auto">
+                  <div className="flex-shrink-0">
                     <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
                       testimonial.type === "pemula" 
                         ? "bg-emerald-500/20 text-emerald-400" 
