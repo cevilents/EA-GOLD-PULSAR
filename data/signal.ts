@@ -1,7 +1,7 @@
 import type { Locale } from "@/lib/i18n";
 
 /** Kontak admin untuk klaim lisensi. Semua CTA di landing page signal mengarah ke sini. */
-export const TELEGRAM_ADMIN = "https://t.me/ALPHAEAPHOENIX";
+export const TELEGRAM_ADMIN = "https://t.me/zlents";
 
 /**
  * Angka performa sinyal untuk landing page.
