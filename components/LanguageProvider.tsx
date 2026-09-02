@@ -25,16 +25,36 @@ function readStoredLocale(): Locale | null {
   }
 }
 
-export function LanguageProvider({ children }: { children: React.ReactNode }) {
+interface LanguageProviderProps {
+  children: React.ReactNode;
+  /**
+   * Tampilkan interstitial pilih bahasa saat kunjungan pertama.
+   * Dimatikan di landing page iklan: satu klik tambahan sebelum pengunjung
+   * melihat penawaran adalah kebocoran konversi yang mahal.
+   */
+  gate?: boolean;
+  /**
+   * Bahasa yang dipakai saat gate dimatikan. Saat `gate` false, pilihan bahasa
+   * yang tersimpan dari halaman lain sengaja diabaikan supaya konten halaman
+   * selalu cocok dengan metadata dan structured data-nya.
+   */
+  defaultLocale?: Locale;
+}
+
+export function LanguageProvider({
+  children,
+  gate = true,
+  defaultLocale = "id"
+}: LanguageProviderProps) {
   const [locale, setLocaleState] = useState<Locale | null>(null);
 
   useEffect(() => {
-    const stored = readStoredLocale();
-    if (stored !== null) {
-      document.documentElement.lang = stored;
+    const resolved = gate ? readStoredLocale() : defaultLocale;
+    if (resolved !== null) {
+      document.documentElement.lang = resolved;
     }
-    setLocaleState(stored);
-  }, []);
+    setLocaleState(resolved);
+  }, [gate, defaultLocale]);
 
   const setLocale = useCallback((next: Locale) => {
     try {
@@ -49,7 +69,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   return (
     <I18nContext.Provider value={{ locale, setLocale }}>
       {children}
-      {locale === null ? <LanguageGate /> : null}
+      {gate && locale === null ? <LanguageGate /> : null}
     </I18nContext.Provider>
   );
 }

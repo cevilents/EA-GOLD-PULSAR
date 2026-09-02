@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 
+const THRESHOLD = 0.15;
+
 interface RevealProps {
   children: React.ReactNode;
   delay?: number;
@@ -15,6 +17,14 @@ export default function Reveal({ children, delay = 0, className = "" }: RevealPr
   useEffect(() => {
     const element = ref.current;
     if (!element) return;
+
+    // Fail-safe: kalau IntersectionObserver tidak tersedia, tampilkan langsung.
+    // Konten yang tidak pernah muncul jauh lebih mahal daripada animasi yang hilang.
+    if (typeof IntersectionObserver === "undefined") {
+      setVisible(true);
+      return;
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -22,10 +32,25 @@ export default function Reveal({ children, delay = 0, className = "" }: RevealPr
           observer.disconnect();
         }
       },
-      { threshold: 0.15 }
+      { threshold: THRESHOLD }
     );
     observer.observe(element);
-    return () => observer.disconnect();
+
+    // Jaring pengaman untuk in-app browser (Instagram/Facebook) yang kadang
+    // menahan callback observer: cek posisi manual sekali setelah 2 detik.
+    const fallback = window.setTimeout(() => {
+      const rect = element.getBoundingClientRect();
+      const shown = Math.min(rect.bottom, window.innerHeight) - Math.max(rect.top, 0);
+      if (rect.height > 0 && shown / rect.height >= THRESHOLD) {
+        setVisible(true);
+        observer.disconnect();
+      }
+    }, 2000);
+
+    return () => {
+      window.clearTimeout(fallback);
+      observer.disconnect();
+    };
   }, []);
 
   return (
