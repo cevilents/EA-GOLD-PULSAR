@@ -20,7 +20,7 @@ export default function SignalFooter() {
             Gold<span className="bg-gradient-to-r from-gold-light to-gold-deep bg-clip-text text-transparent">Pulsar</span>
           </span>
           <div className="flex items-center gap-5 text-sm">
-            <a href="/" className="text-zinc-400 transition-colors hover:text-gold-light">
+            <a href="/ea" className="text-zinc-400 transition-colors hover:text-gold-light">
               {c.footer.back}
             </a>
             <a

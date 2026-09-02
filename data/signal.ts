@@ -327,7 +327,7 @@ export const signalCopies: Record<Locale, SignalCopy> = {
     footer: {
       disclaimer:
         "Peringatan Risiko: Perdagangan forex dan CFD memakai leverage dan berisiko tinggi, termasuk kemungkinan kehilangan seluruh modal Anda. Sinyal yang kami bagikan adalah informasi edukatif, bukan nasihat investasi, dan bukan jaminan hasil. Kinerja masa lalu tidak menjamin kinerja di masa depan. Setiap keputusan trading beserta risikonya sepenuhnya menjadi tanggung jawab Anda. Gunakan hanya dana yang Anda siap kehilangan.",
-      back: "Halaman Utama",
+      back: "Koleksi EA Phoenix",
       rights: "© {year} GoldPulsarEA. Semua hak dilindungi."
     }
   },
@@ -544,7 +544,7 @@ export const signalCopies: Record<Locale, SignalCopy> = {
     footer: {
       disclaimer:
         "Risk Warning: Forex and CFD trading is leveraged and carries a high level of risk, including the possible loss of all your capital. The signals we share are educational information, not investment advice, and are not a guarantee of results. Past performance does not guarantee future performance. Every trading decision and its risk is entirely your own responsibility. Only trade with funds you can afford to lose.",
-      back: "Main Page",
+      back: "Phoenix EA Collection",
       rights: "© {year} GoldPulsarEA. All rights reserved."
     }
   }
