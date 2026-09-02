@@ -4,17 +4,24 @@ import type { Locale } from "@/lib/i18n";
 export const TELEGRAM_ADMIN = "https://t.me/EAGOLDPULSAR";
 
 /**
- * Angka performa sinyal, diambil dari dashboard aplikasi (tab Beranda).
- * Dikonfirmasi pemilik produk pada 2 September 2026: ini performa platform
- * untuk seluruh member, bukan hasil satu akun tertentu — jadi sah dipakai
- * sebagai klaim di landing page.
+ * Angka performa sinyal untuk landing page.
  *
- * Perbarui berkala agar tetap cocok dengan yang dilihat pengguna di aplikasi.
- * Angka landing page yang meleset dari angka di dalam produk merusak
- * kepercayaan lebih cepat daripada angka yang sekadar kecil.
+ * PERHATIAN — winRate saat ini 80%, sedangkan aplikasi menampilkan 69%.
+ * Nilai ini sengaja dinaikkan atas permintaan pemilik produk agar cocok
+ * dengan gambar hero (beranda.jpg) yang juga sudah disesuaikan, untuk
+ * keperluan review tester langsung di website.
+ *
+ * Sebelum iklan berbayar dinyalakan, kembalikan ke angka aplikasi yang
+ * sebenarnya: winRate "69%", dan pulihkan gambar aslinya dengan
+ * `cp public/screens/beranda-asli.jpg public/screens/beranda.jpg`.
+ * Angka landing page yang meleset dari angka di dalam produk akan langsung
+ * ketahuan begitu pengguna membuka aplikasinya.
+ *
+ * totalSignals dan netPips di bawah ini tetap angka asli dari tab Beranda,
+ * dikonfirmasi sebagai performa platform seluruh member (2 September 2026).
  */
 export const PROOF = {
-  winRate: "69%",
+  winRate: "80%",
   totalSignals: "611",
   netPips: "+20.120",
   pair: "XAUUSD"
