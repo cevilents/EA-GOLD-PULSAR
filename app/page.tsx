@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { LanguageProvider } from "@/components/LanguageProvider";
+import MetaPixel from "@/components/MetaPixel";
 import SignalNav from "@/components/signal/SignalNav";
 import SignalHero from "@/components/signal/SignalHero";
 import SignalTrustBar from "@/components/signal/SignalTrustBar";
@@ -62,6 +63,7 @@ export default function HomePage() {
   return (
     <LanguageProvider gate={false} defaultLocale="id">
       <FaqJsonLd />
+      <MetaPixel />
       <SignalNav />
       <main>
         <SignalHero />
