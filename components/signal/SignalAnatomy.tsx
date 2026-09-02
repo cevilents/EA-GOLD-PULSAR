@@ -25,7 +25,7 @@ export default function SignalAnatomy() {
         <div className="mt-14 grid items-start gap-12 lg:grid-cols-[0.85fr_1.15fr]">
           <Reveal>
             <AppScreenshot
-              src="signal.png"
+              src="signal.jpg"
               alt={locale === "id" ? "Daftar sinyal XAUUSD beserta hasilnya di aplikasi" : "XAUUSD signal list with outcomes in the app"}
             />
           </Reveal>

@@ -40,6 +40,8 @@ export default function AppScreenshot({
         <img
           src={`/screens/${src}`}
           alt={alt}
+          width={738}
+          height={1600}
           loading={priority ? "eager" : "lazy"}
           fetchPriority={priority ? "high" : "auto"}
           onError={() => setFailed(true)}

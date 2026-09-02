@@ -7,10 +7,10 @@ import { signalCopies } from "@/data/signal";
 
 /** Screenshot dipetakan lewat kunci, bukan urutan array. */
 const SHOTS: Record<"chat" | "materi" | "indikator" | "ea", string> = {
-  chat: "chat.png",
-  materi: "materi.png",
-  indikator: "indikator.png",
-  ea: "ea.png"
+  chat: "chat.jpg",
+  materi: "materi.jpg",
+  indikator: "indikator.jpg",
+  ea: "ea.jpg"
 };
 
 export default function SignalAppTour() {
