@@ -1,7 +1,7 @@
 "use client";
 
+import AppScreenshot from "./AppScreenshot";
 import CandleChart from "../CandleChart";
-import PhoneMockup from "./PhoneMockup";
 import { useI18n } from "../LanguageProvider";
 import { PROOF, TELEGRAM_ADMIN, signalCopies } from "@/data/signal";
 
@@ -79,14 +79,21 @@ export default function SignalHero() {
                 ))}
               </div>
               <p className="text-xs text-zinc-400">
-                {c.hero.socialProof.replace("{members}", PROOF.members)}
+                {c.hero.socialProof
+                  .replace("{signals}", PROOF.totalSignals)
+                  .replace("{winRate}", PROOF.winRate)}
               </p>
             </div>
           </div>
 
           <div className="relative">
             <div className="pointer-events-none absolute left-1/2 top-1/2 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gold/12 blur-3xl" />
-            <PhoneMockup className="relative" />
+            <AppScreenshot
+              src="beranda.png"
+              alt={locale === "id" ? "Tampilan beranda aplikasi GoldPulsar" : "GoldPulsar app home screen"}
+              priority
+              className="relative"
+            />
           </div>
         </div>
       </div>

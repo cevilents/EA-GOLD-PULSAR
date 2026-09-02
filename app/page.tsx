@@ -8,6 +8,7 @@ import SignalProblem from "@/components/signal/SignalProblem";
 import SignalAnatomy from "@/components/signal/SignalAnatomy";
 import SignalHowTo from "@/components/signal/SignalHowTo";
 import SignalFeatures from "@/components/signal/SignalFeatures";
+import SignalAppTour from "@/components/signal/SignalAppTour";
 import SignalProof from "@/components/signal/SignalProof";
 import SignalWhyFree from "@/components/signal/SignalWhyFree";
 import SignalTestimonials from "@/components/signal/SignalTestimonials";
@@ -72,6 +73,7 @@ export default function HomePage() {
         <SignalAnatomy />
         <SignalHowTo />
         <SignalFeatures />
+        <SignalAppTour />
         <SignalProof />
         <SignalWhyFree />
         <SignalTestimonials />

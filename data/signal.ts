@@ -4,14 +4,15 @@ import type { Locale } from "@/lib/i18n";
 export const TELEGRAM_ADMIN = "https://t.me/EAGOLDPULSAR";
 
 /**
- * ANGKA PROOF — WAJIB DIGANTI DENGAN DATA ASLI SEBELUM IKLAN DINYALAKAN.
- * Nilai di bawah ini placeholder. Angka yang tidak bisa dibuktikan adalah
- * risiko kredibilitas sekaligus risiko penolakan iklan di Meta/Google.
+ * Angka performa sinyal, diambil dari dashboard aplikasi (tab Beranda).
+ * Perbarui berkala agar tetap cocok dengan yang dilihat pengguna di aplikasi —
+ * angka landing page yang meleset dari angka di dalam produk merusak
+ * kepercayaan lebih cepat daripada angka yang sekadar kecil.
  */
 export const PROOF = {
-  members: "3.200+",
-  signalsPerMonth: "40-60",
-  avgResponse: "< 10 menit",
+  winRate: "69%",
+  totalSignals: "611",
+  netPips: "+20.120",
   pair: "XAUUSD"
 } as const;
 
@@ -25,17 +26,16 @@ export interface SignalStep {
   body: string;
 }
 
+/** Kunci menentukan screenshot mana yang dipakai; tidak terikat urutan array. */
+export interface AppTourItem {
+  key: "chat" | "materi" | "indikator";
+  title: string;
+  body: string;
+}
+
 export interface SignalFaqItem {
   q: string;
   a: string;
-}
-
-export interface TrackRecordRow {
-  month: string;
-  signals: string;
-  win: string;
-  loss: string;
-  net: string;
 }
 
 export interface SignalTestimonial {
@@ -43,18 +43,6 @@ export interface SignalTestimonial {
   meta: string;
   quote: string;
 }
-
-/**
- * REKAP BULANAN — WAJIB DIGANTI DENGAN DATA ASLI.
- * Tampilkan juga bulan yang merugi. Provider yang hanya memamerkan bulan hijau
- * adalah pola yang paling cepat dikenali trader berpengalaman sebagai tidak jujur.
- */
-export const TRACK_RECORD: TrackRecordRow[] = [
-  { month: "2026-05", signals: "48", win: "31", loss: "17", net: "+412 pips" },
-  { month: "2026-06", signals: "52", win: "33", loss: "19", net: "+286 pips" },
-  { month: "2026-07", signals: "44", win: "24", loss: "20", net: "-118 pips" },
-  { month: "2026-08", signals: "57", win: "38", loss: "19", net: "+604 pips" }
-];
 
 /**
  * TESTIMONI — SENGAJA DIKOSONGKAN.
@@ -80,7 +68,7 @@ export interface SignalCopy {
     reassurance: string;
     socialProof: string;
   };
-  trust: { members: string; signals: string; response: string; pair: string };
+  trust: { winRate: string; totalSignals: string; netPips: string; pair: string };
   problem: { eyebrow: string; title: string; pains: string[]; bridge: string };
   anatomy: {
     eyebrow: string;
@@ -92,11 +80,12 @@ export interface SignalCopy {
   };
   howTo: { eyebrow: string; title: string; body: string; steps: SignalStep[]; cta: string };
   features: { eyebrow: string; title: string; body: string; items: SignalPoint[] };
+  appTour: { eyebrow: string; title: string; body: string; items: AppTourItem[] };
   proof: {
     eyebrow: string;
     title: string;
     body: string;
-    columns: { month: string; signals: string; win: string; loss: string; net: string };
+    stats: { winRate: string; totalSignals: string; netPips: string };
     note: string;
   };
   whyFree: { eyebrow: string; title: string; body: string; points: SignalPoint[] };
@@ -128,12 +117,12 @@ export const signalCopies: Record<Locale, SignalCopy> = {
       ctaPrimary: "Klaim Lisensi Gratis →",
       ctaSecondary: "Lihat isi sinyalnya dulu ↓",
       reassurance: "Tanpa biaya · Tanpa kartu kredit · Tanpa minimum deposit · Berhenti kapan saja",
-      socialProof: "Dipakai {members} trader XAUUSD"
+      socialProof: "{signals} sinyal terkirim · winrate {winRate}"
     },
     trust: {
-      members: "Member aktif",
-      signals: "Sinyal per bulan",
-      response: "Respon admin",
+      winRate: "Winrate",
+      totalSignals: "Sinyal terkirim",
+      netPips: "Akumulasi pips",
       pair: "Fokus satu pair"
     },
     problem: {
@@ -152,7 +141,7 @@ export const signalCopies: Record<Locale, SignalCopy> = {
       eyebrow: "Isi satu sinyal",
       title: "Bukan Cuma “BUY Sekarang”. Ini yang Kamu Terima.",
       body:
-        "Sinyal yang tidak bisa dieksekusi bukan sinyal, itu cuma opini. Setiap notifikasi yang kami kirim sudah berisi semua yang kamu butuhkan untuk langsung pasang order.",
+        "Sinyal yang tidak bisa dieksekusi bukan sinyal, itu cuma opini. Setiap notifikasi yang kami kirim sudah berisi semua yang kamu butuhkan untuk langsung pasang order — dan hasil setiap sinyal, menang maupun kalah, tetap tercatat di aplikasi.",
       parts: [
         {
           title: "Arah & pair",
@@ -234,20 +223,41 @@ export const signalCopies: Record<Locale, SignalCopy> = {
         }
       ]
     },
+    appTour: {
+      eyebrow: "Isi aplikasi",
+      title: "Yang Kamu Dapat Bukan Cuma Sinyal",
+      body:
+        "Satu aplikasi, satu lisensi, dan semuanya ikut terbuka begitu kamu masuk. Tidak ada paket terpisah, tidak ada yang dikunci di balik biaya tambahan.",
+      items: [
+        {
+          key: "chat",
+          title: "Chat komunitas",
+          body: "Tempat bertanya langsung ke admin dan sesama trader — soal setup, soal eksekusi, soal apa pun yang bikin ragu."
+        },
+        {
+          key: "materi",
+          title: "Materi edukasi",
+          body: "PDF terstruktur: Smart Money Concepts, mentalitas risiko, sampai metode konfluensi. Supaya kamu paham alasannya, bukan cuma ikut."
+        },
+        {
+          key: "indikator",
+          title: "Indikator TradingView",
+          body: "Auto Fib Terminal, Sniper Entry, dan pemetaan SMC — langsung bisa dibuka di chart TradingView-mu sendiri."
+        }
+      ]
+    },
     proof: {
       eyebrow: "Transparansi",
       title: "Kami Tampilkan yang Menang dan yang Kalah",
       body:
-        "Penyedia sinyal yang hanya memamerkan bulan hijau sedang menyembunyikan sesuatu. Ini rekap kami apa adanya — ada bulan yang merah, dan kami tidak menghapusnya.",
-      columns: {
-        month: "Bulan",
-        signals: "Sinyal",
-        win: "Menang",
-        loss: "Kalah",
-        net: "Net"
+        "Penyedia sinyal yang hanya memamerkan profit sedang menyembunyikan sesuatu. Di aplikasi, setiap sinyal tercatat lengkap dengan hasilnya — termasuk yang kena stop loss. Riwayatnya terbuka sejak hari pertama kamu masuk, bukan setelah kamu membayar.",
+      stats: {
+        winRate: "Winrate",
+        totalSignals: "Total sinyal tercatat",
+        netPips: "Akumulasi pips"
       },
       note:
-        "Rekap ini bukan janji hasil. Hasil setiap orang berbeda tergantung waktu eksekusi, spread broker, dan ukuran lot yang dipakai."
+        "Angka ini adalah performa sinyal, bukan janji hasil. Hasil setiap orang berbeda tergantung waktu eksekusi, spread broker, dan ukuran lot yang dipakai — dan sebagian sinyal memang berakhir rugi."
     },
     whyFree: {
       eyebrow: "Pertanyaan yang pasti ada di kepalamu",
@@ -291,7 +301,7 @@ export const signalCopies: Record<Locale, SignalCopy> = {
         },
         {
           q: "Berapa sinyal yang saya terima?",
-          a: "Rata-rata " + PROOF.signalsPerMonth + " sinyal per bulan. Kami sengaja tidak mengirim sinyal setiap jam — kalau pasarnya tidak jelas, tidak ada sinyal, dan itu memang tujuannya."
+          a: "Bervariasi mengikuti kondisi pasar — pada hari yang ramai bisa sekitar 9 sinyal, pada hari yang sepi bisa tidak ada sama sekali. Kami sengaja tidak mengirim sinyal setiap jam: kalau pasarnya tidak jelas, tidak ada sinyal, dan itu memang tujuannya."
         },
         {
           q: "Apakah dijamin profit?",
@@ -345,12 +355,12 @@ export const signalCopies: Record<Locale, SignalCopy> = {
       ctaPrimary: "Claim Your Free Licence →",
       ctaSecondary: "See what a signal contains ↓",
       reassurance: "No fees · No credit card · No minimum deposit · Leave anytime",
-      socialProof: "Used by {members} XAUUSD traders"
+      socialProof: "{signals} signals sent · {winRate} win rate"
     },
     trust: {
-      members: "Active members",
-      signals: "Signals per month",
-      response: "Admin response",
+      winRate: "Win rate",
+      totalSignals: "Signals sent",
+      netPips: "Cumulative pips",
       pair: "Single-pair focus"
     },
     problem: {
@@ -369,7 +379,7 @@ export const signalCopies: Record<Locale, SignalCopy> = {
       eyebrow: "Inside one signal",
       title: "Not Just “Buy Now”. Here's What You Actually Get.",
       body:
-        "A signal you can't execute isn't a signal, it's an opinion. Every notification we send already contains everything you need to place the order immediately.",
+        "A signal you can't execute isn't a signal, it's an opinion. Every notification we send already contains everything you need to place the order immediately — and every signal's outcome, win or lose, stays on record in the app.",
       parts: [
         {
           title: "Direction & pair",
@@ -451,20 +461,41 @@ export const signalCopies: Record<Locale, SignalCopy> = {
         }
       ]
     },
+    appTour: {
+      eyebrow: "Inside the app",
+      title: "You Get More Than Signals",
+      body:
+        "One app, one licence, and all of it opens up the moment you're in. No separate packages, nothing locked behind an extra fee.",
+      items: [
+        {
+          key: "chat",
+          title: "Community chat",
+          body: "Ask the admin and other traders directly — about a setup, about execution, about anything that leaves you unsure."
+        },
+        {
+          key: "materi",
+          title: "Education library",
+          body: "Structured PDFs: Smart Money Concepts, risk mindset, and confluence method. So you understand the reasoning, not just follow along."
+        },
+        {
+          key: "indikator",
+          title: "TradingView indicators",
+          body: "Auto Fib Terminal, Sniper Entry, and SMC mapping — open them straight on your own TradingView charts."
+        }
+      ]
+    },
     proof: {
       eyebrow: "Transparency",
       title: "We Show the Wins and the Losses",
       body:
-        "A signal provider that only shows green months is hiding something. This is our record as it stands — one month is red, and we left it there.",
-      columns: {
-        month: "Month",
-        signals: "Signals",
-        win: "Wins",
-        loss: "Losses",
-        net: "Net"
+        "A signal provider that only shows profits is hiding something. In the app every signal is recorded with its outcome — including the ones that hit stop loss. The history is open from your first day, not after you pay.",
+      stats: {
+        winRate: "Win rate",
+        totalSignals: "Signals on record",
+        netPips: "Cumulative pips"
       },
       note:
-        "This record is not a promise of results. Your outcome will differ based on execution timing, your broker's spread, and the lot size you use."
+        "These are signal performance figures, not a promise of results. Your outcome will differ based on execution timing, your broker's spread, and the lot size you use — and some signals do end in a loss."
     },
     whyFree: {
       eyebrow: "The question you're already asking",
@@ -508,7 +539,7 @@ export const signalCopies: Record<Locale, SignalCopy> = {
         },
         {
           q: "How many signals will I get?",
-          a: "On average " + PROOF.signalsPerMonth + " signals per month. We deliberately don't send one every hour — when the market isn't clear, there's no signal, and that's the point."
+          a: "It varies with the market — a busy day may bring around 9 signals, a quiet one none at all. We deliberately don't send one every hour: when the market isn't clear, there's no signal, and that's the point."
         },
         {
           q: "Is profit guaranteed?",

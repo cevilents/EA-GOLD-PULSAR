@@ -9,9 +9,9 @@ export default function SignalTrustBar() {
   const c = signalCopies[locale];
 
   const items = [
-    { value: PROOF.members, label: c.trust.members },
-    { value: PROOF.signalsPerMonth, label: c.trust.signals },
-    { value: PROOF.avgResponse, label: c.trust.response },
+    { value: PROOF.winRate, label: c.trust.winRate },
+    { value: PROOF.totalSignals, label: c.trust.totalSignals },
+    { value: PROOF.netPips, label: c.trust.netPips },
     { value: PROOF.pair, label: c.trust.pair }
   ];
 

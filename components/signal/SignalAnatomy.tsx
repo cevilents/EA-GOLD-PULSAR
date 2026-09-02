@@ -1,6 +1,6 @@
 "use client";
 
-import PhoneMockup from "./PhoneMockup";
+import AppScreenshot from "./AppScreenshot";
 import Reveal from "../Reveal";
 import { useI18n } from "../LanguageProvider";
 import { TELEGRAM_ADMIN, signalCopies } from "@/data/signal";
@@ -24,7 +24,10 @@ export default function SignalAnatomy() {
 
         <div className="mt-14 grid items-start gap-12 lg:grid-cols-[0.85fr_1.15fr]">
           <Reveal>
-            <PhoneMockup showNotification={false} />
+            <AppScreenshot
+              src="signal.png"
+              alt={locale === "id" ? "Daftar sinyal XAUUSD beserta hasilnya di aplikasi" : "XAUUSD signal list with outcomes in the app"}
+            />
           </Reveal>
 
           <div className="grid gap-4 sm:grid-cols-2">

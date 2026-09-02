@@ -2,19 +2,17 @@
 
 import Reveal from "../Reveal";
 import { useI18n } from "../LanguageProvider";
-import { TRACK_RECORD, signalCopies } from "@/data/signal";
-
-/** Menangani hyphen ASCII maupun tanda minus tipografis (U+2212). */
-function isNegative(net: string): boolean {
-  const value = Number.parseFloat(net.replace(/\u2212/g, "-").replace(/[^\d.-]/g, ""));
-  return Number.isFinite(value) && value < 0;
-}
+import { PROOF, signalCopies } from "@/data/signal";
 
 export default function SignalProof() {
   const { locale } = useI18n();
   const c = signalCopies[locale];
 
-  if (TRACK_RECORD.length === 0) return null;
+  const stats = [
+    { value: PROOF.winRate, label: c.proof.stats.winRate },
+    { value: PROOF.totalSignals, label: c.proof.stats.totalSignals },
+    { value: PROOF.netPips, label: c.proof.stats.netPips }
+  ];
 
   return (
     <section id="transparansi" className="relative scroll-mt-16 py-20 sm:py-24">
@@ -29,46 +27,19 @@ export default function SignalProof() {
           </div>
         </Reveal>
 
-        <Reveal delay={120}>
-          <div
-            role="region"
-            aria-label={c.proof.title}
-            tabIndex={0}
-            className="mt-12 overflow-x-auto rounded-2xl border border-white/10 bg-white/[0.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
-          >
-            <table className="w-full min-w-[520px] text-sm">
-              <thead>
-                <tr className="border-b border-white/10 text-left text-xs uppercase tracking-wide text-zinc-400">
-                  <th scope="col" className="px-5 py-3.5 font-medium">{c.proof.columns.month}</th>
-                  <th scope="col" className="px-5 py-3.5 text-right font-medium">{c.proof.columns.signals}</th>
-                  <th scope="col" className="px-5 py-3.5 text-right font-medium">{c.proof.columns.win}</th>
-                  <th scope="col" className="px-5 py-3.5 text-right font-medium">{c.proof.columns.loss}</th>
-                  <th scope="col" className="px-5 py-3.5 text-right font-medium">{c.proof.columns.net}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {TRACK_RECORD.map((row) => (
-                  <tr key={row.month} className="border-b border-white/5 last:border-0">
-                    <td className="px-5 py-3.5 font-display font-semibold text-white">{row.month}</td>
-                    <td className="px-5 py-3.5 text-right tabular-nums text-zinc-400">{row.signals}</td>
-                    <td className="px-5 py-3.5 text-right tabular-nums text-emerald-400">{row.win}</td>
-                    <td className="px-5 py-3.5 text-right tabular-nums text-red-400">{row.loss}</td>
-                    <td
-                      className={`px-5 py-3.5 text-right font-display font-bold tabular-nums ${
-                        isNegative(row.net) ? "text-red-400" : "text-emerald-400"
-                      }`}
-                    >
-                      {row.net}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </Reveal>
+        <dl className="mt-12 grid gap-4 sm:grid-cols-3">
+          {stats.map((stat, i) => (
+            <Reveal key={stat.label} delay={i * 90}>
+              <div className="rounded-2xl border border-emerald-500/20 bg-gradient-to-br from-emerald-500/[0.08] to-transparent p-6 text-center">
+                <dd className="font-display text-3xl font-bold text-emerald-400 sm:text-4xl">{stat.value}</dd>
+                <dt className="mt-2 text-xs uppercase tracking-wide text-zinc-400">{stat.label}</dt>
+              </div>
+            </Reveal>
+          ))}
+        </dl>
 
         <Reveal delay={180}>
-          <p className="mx-auto mt-6 max-w-2xl text-center text-xs leading-relaxed text-zinc-400">
+          <p className="mx-auto mt-8 max-w-2xl text-center text-xs leading-relaxed text-zinc-400">
             {c.proof.note}
           </p>
         </Reveal>
