@@ -6,10 +6,11 @@ import { useI18n } from "../LanguageProvider";
 import { signalCopies } from "@/data/signal";
 
 /** Screenshot dipetakan lewat kunci, bukan urutan array. */
-const SHOTS: Record<"chat" | "materi" | "indikator", string> = {
+const SHOTS: Record<"chat" | "materi" | "indikator" | "ea", string> = {
   chat: "chat.png",
   materi: "materi.png",
-  indikator: "indikator.png"
+  indikator: "indikator.png",
+  ea: "ea.png"
 };
 
 export default function SignalAppTour() {
@@ -29,7 +30,7 @@ export default function SignalAppTour() {
           </div>
         </Reveal>
 
-        <div className="mt-14 grid gap-10 sm:grid-cols-3">
+        <div className="mt-14 grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           {c.appTour.items.map((item, i) => (
             <Reveal key={item.key} delay={i * 110}>
               <article className="text-center">
@@ -37,10 +38,10 @@ export default function SignalAppTour() {
                   src={SHOTS[item.key]}
                   alt={item.title}
                   fallback={false}
-                  className="!w-[210px] sm:!w-[230px]"
+                  className="!w-[200px]"
                 />
                 <h3 className="mt-6 font-display text-lg font-bold text-white">{item.title}</h3>
-                <p className="mx-auto mt-2 max-w-xs text-sm leading-relaxed text-zinc-400">{item.body}</p>
+                <p className="mx-auto mt-2 max-w-[15rem] text-sm leading-relaxed text-zinc-400">{item.body}</p>
               </article>
             </Reveal>
           ))}

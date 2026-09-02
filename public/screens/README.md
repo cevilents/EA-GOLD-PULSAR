@@ -11,6 +11,7 @@ cadangan sehingga tidak pernah tampil gambar rusak.
 | `chat.png` | Tab Chat — komunitas | Section "Isi aplikasi" |
 | `materi.png` | Tab Materi — daftar PDF edukasi | Section "Isi aplikasi" |
 | `indikator.png` | Tab Indikator — indikator TradingView | Section "Isi aplikasi" |
+| `ea.png` | Daftar EA yang bisa diunduh | Section "Isi aplikasi" |
 
 ## Wajib sebelum publish
 

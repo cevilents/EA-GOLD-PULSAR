@@ -5,8 +5,12 @@ export const TELEGRAM_ADMIN = "https://t.me/EAGOLDPULSAR";
 
 /**
  * Angka performa sinyal, diambil dari dashboard aplikasi (tab Beranda).
- * Perbarui berkala agar tetap cocok dengan yang dilihat pengguna di aplikasi —
- * angka landing page yang meleset dari angka di dalam produk merusak
+ * Dikonfirmasi pemilik produk pada 2 September 2026: ini performa platform
+ * untuk seluruh member, bukan hasil satu akun tertentu — jadi sah dipakai
+ * sebagai klaim di landing page.
+ *
+ * Perbarui berkala agar tetap cocok dengan yang dilihat pengguna di aplikasi.
+ * Angka landing page yang meleset dari angka di dalam produk merusak
  * kepercayaan lebih cepat daripada angka yang sekadar kecil.
  */
 export const PROOF = {
@@ -28,7 +32,7 @@ export interface SignalStep {
 
 /** Kunci menentukan screenshot mana yang dipakai; tidak terikat urutan array. */
 export interface AppTourItem {
-  key: "chat" | "materi" | "indikator";
+  key: "chat" | "materi" | "indikator" | "ea";
   title: string;
   body: string;
 }
@@ -243,6 +247,11 @@ export const signalCopies: Record<Locale, SignalCopy> = {
           key: "indikator",
           title: "Indikator TradingView",
           body: "Auto Fib Terminal, Sniper Entry, dan pemetaan SMC — langsung bisa dibuka di chart TradingView-mu sendiri."
+        },
+        {
+          key: "ea",
+          title: "EA & bot otomatis",
+          body: "Phoenix Cent, Alpha V5, Breakout, sampai DCA — file EA siap unduh dari dalam aplikasi, panduan pemasangannya ada di Materi."
         }
       ]
     },
@@ -481,6 +490,11 @@ export const signalCopies: Record<Locale, SignalCopy> = {
           key: "indikator",
           title: "TradingView indicators",
           body: "Auto Fib Terminal, Sniper Entry, and SMC mapping — open them straight on your own TradingView charts."
+        },
+        {
+          key: "ea",
+          title: "EAs & automation",
+          body: "Phoenix Cent, Alpha V5, Breakout, and DCA — downloadable from inside the app, with setup guides in the education library."
         }
       ]
     },
