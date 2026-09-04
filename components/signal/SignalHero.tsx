@@ -3,7 +3,7 @@
 import AppScreenshot from "./AppScreenshot";
 import CandleChart from "../CandleChart";
 import { useI18n } from "../LanguageProvider";
-import { PROOF, TELEGRAM_ADMIN, signalCopies } from "@/data/signal";
+import { PROOF, signalCopies, telegramStartLink } from "@/data/signal";
 
 function TelegramIcon() {
   return (
@@ -48,7 +48,7 @@ export default function SignalHero() {
 
             <div className="mt-9 flex flex-col items-center gap-3 sm:flex-row sm:justify-center lg:justify-start">
               <a
-                href={TELEGRAM_ADMIN}
+                href={telegramStartLink("hero-primary")}
                 target="_blank"
                 rel="noopener noreferrer"
                 data-cta="hero-primary"

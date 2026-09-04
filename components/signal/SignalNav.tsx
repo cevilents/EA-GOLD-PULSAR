@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useI18n, useI18nContext } from "../LanguageProvider";
-import { TELEGRAM_ADMIN, signalCopies } from "@/data/signal";
+import { signalCopies, telegramStartLink } from "@/data/signal";
 
 function LogoMark() {
   return (
@@ -83,7 +83,7 @@ export default function SignalNav() {
             {c.nav.langLabel}
           </button>
           <a
-            href={TELEGRAM_ADMIN}
+            href={telegramStartLink("nav")}
             target="_blank"
             rel="noopener noreferrer"
             data-cta="nav"
@@ -131,7 +131,7 @@ export default function SignalNav() {
             </button>
           </div>
           <a
-            href={TELEGRAM_ADMIN}
+            href={telegramStartLink("nav-mobile")}
             target="_blank"
             rel="noopener noreferrer"
             data-cta="nav-mobile"

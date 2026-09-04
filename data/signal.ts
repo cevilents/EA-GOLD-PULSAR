@@ -1,7 +1,23 @@
 import type { Locale } from "@/lib/i18n";
 
-/** Kontak admin untuk klaim lisensi. Semua CTA di landing page signal mengarah ke sini. */
-export const TELEGRAM_ADMIN = "https://t.me/zlents";
+/** Bot Telegram tempat klaim lisensi diproses. */
+export const TELEGRAM_BOT = "https://t.me/PhoenixSignalVIP_bot";
+
+/**
+ * Deep link ke bot beserta payload `start`.
+ *
+ * Telegram mengirim `/start <source>` ke bot saat chat dibuka: langsung bagi
+ * pengguna yang sudah pernah membuka bot ini, sedangkan pengguna baru perlu
+ * menekan tombol START sekali — ketentuan anti-spam Telegram yang tidak bisa
+ * dilewati dari sisi web.
+ *
+ * `source` ikut terkirim sebagai payload sehingga bot tahu tombol mana di
+ * landing page yang mengantar pengguna. Telegram hanya menerima A-Z, a-z,
+ * 0-9, `_`, dan `-` pada payload, maksimal 64 karakter.
+ */
+export function telegramStartLink(source: string): string {
+  return `${TELEGRAM_BOT}?start=${source}`;
+}
 
 /**
  * Angka performa sinyal untuk landing page.

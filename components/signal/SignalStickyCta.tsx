@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useI18n } from "../LanguageProvider";
-import { TELEGRAM_ADMIN, signalCopies } from "@/data/signal";
+import { signalCopies, telegramStartLink } from "@/data/signal";
 
 export default function SignalStickyCta() {
   const { locale } = useI18n();
@@ -31,7 +31,7 @@ export default function SignalStickyCta() {
           <p className="font-display text-sm font-bold text-white">{c.sticky.headline}</p>
         </div>
         <a
-          href={TELEGRAM_ADMIN}
+          href={telegramStartLink("sticky")}
           target="_blank"
           rel="noopener noreferrer"
           data-cta="sticky"

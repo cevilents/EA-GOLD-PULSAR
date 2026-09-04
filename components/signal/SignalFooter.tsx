@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useI18n } from "../LanguageProvider";
-import { TELEGRAM_ADMIN, signalCopies } from "@/data/signal";
+import { signalCopies, telegramStartLink } from "@/data/signal";
 
 export default function SignalFooter() {
   const { locale } = useI18n();
@@ -24,7 +24,7 @@ export default function SignalFooter() {
               {c.footer.back}
             </a>
             <a
-              href={TELEGRAM_ADMIN}
+              href={telegramStartLink("footer")}
               target="_blank"
               rel="noopener noreferrer"
               className="text-gold-light transition-colors hover:text-gold"

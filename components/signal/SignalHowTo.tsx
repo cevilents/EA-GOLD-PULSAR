@@ -2,7 +2,7 @@
 
 import Reveal from "../Reveal";
 import { useI18n } from "../LanguageProvider";
-import { TELEGRAM_ADMIN, signalCopies } from "@/data/signal";
+import { signalCopies, telegramStartLink } from "@/data/signal";
 
 export default function SignalHowTo() {
   const { locale } = useI18n();
@@ -38,7 +38,7 @@ export default function SignalHowTo() {
         <Reveal delay={250}>
           <div className="mt-12 text-center">
             <a
-              href={TELEGRAM_ADMIN}
+              href={telegramStartLink("howto")}
               target="_blank"
               rel="noopener noreferrer"
               data-cta="howto"

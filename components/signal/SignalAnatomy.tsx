@@ -3,7 +3,7 @@
 import AppScreenshot from "./AppScreenshot";
 import Reveal from "../Reveal";
 import { useI18n } from "../LanguageProvider";
-import { TELEGRAM_ADMIN, signalCopies } from "@/data/signal";
+import { signalCopies, telegramStartLink } from "@/data/signal";
 
 export default function SignalAnatomy() {
   const { locale } = useI18n();
@@ -61,7 +61,7 @@ export default function SignalAnatomy() {
         <Reveal delay={200}>
           <div className="mt-8 text-center">
             <a
-              href={TELEGRAM_ADMIN}
+              href={telegramStartLink("anatomy")}
               target="_blank"
               rel="noopener noreferrer"
               data-cta="anatomy"

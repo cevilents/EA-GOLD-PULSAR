@@ -2,7 +2,7 @@
 
 import Reveal from "../Reveal";
 import { useI18n } from "../LanguageProvider";
-import { TELEGRAM_ADMIN, signalCopies } from "@/data/signal";
+import { signalCopies, telegramStartLink } from "@/data/signal";
 
 export default function SignalCTA() {
   const { locale } = useI18n();
@@ -24,7 +24,7 @@ export default function SignalCTA() {
           </p>
 
           <a
-            href={TELEGRAM_ADMIN}
+            href={telegramStartLink("final")}
             target="_blank"
             rel="noopener noreferrer"
             data-cta="final"
